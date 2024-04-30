@@ -1,7 +1,7 @@
 # Startup Code
 
 The goal of this exercise is to provide a stable base from which subsequent 
-exercises can build upon. Upon completion of this exercise should have the
+exercises can build upon. Upon completion of this exercise, you should have the
 following:
 
 - the processor toolchain installed

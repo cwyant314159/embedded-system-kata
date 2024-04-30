@@ -25,7 +25,7 @@ BINARY_NAME := 00_bringup
 BINARY_DIR := $(BIN_ROOT_DIR)/$(BINARY_NAME)
 
 # directory for compiled objects #
-OBJ_DIR := $(OBJ_ROOT_DIR)
+OBJ_DIR := $(OBJ_ROOT_DIR)/$(BINARY_NAME)
 
 # include directories used by the exercise #
 _INC_DIRS := common/src
