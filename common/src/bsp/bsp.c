@@ -1,11 +1,19 @@
 #include "bsp/bsp.h"
 
-#include "bsp/reg_io.h"
+#include <avr/interrupt.h>
+#include "bsp/private/processor/reg_io.h"
+#include "bsp/private/timer/timer.h"
 
 #define LED_PORT        (GPIO_B)
 
 #define LED_PIN         (5u)
 #define LED_PIN_MASK    (1 << LED_PIN)
+
+#define BSP_TIMER       (TIM1)
+#define MAX_USEC        (32767u)
+#define MAX_MSEC        (262u)
+#define MAX_SEC         (4u)
+
 
 /**
  * @brief BSP initialization
@@ -17,10 +25,22 @@
  */
 void bsp_init(void)
 {
-    LED_PORT->DDR   = 0x00u;        /* all pins as inputs        */
-    LED_PORT->PORT  = 0x00u;        /* disable internal pull-ups */
-    LED_PORT->DDR   = LED_PIN_MASK; /* LED pin as output         */
-    bsp_set_builtin_led(E_OFF);     /* LED is off on startup */
+    LED_PORT->DDR   = 0x00u;        /* all pins as inputs              */
+    LED_PORT->PORT  = 0x00u;        /* disable internal pull-ups       */
+    LED_PORT->DDR   = LED_PIN_MASK; /* LED pin as output               */
+    bsp_set_builtin_led(E_OFF);     /* LED is off on startup           */
+    timer_16bit_init(BSP_TIMER);    /* initialize (and stop) the timer */
+}
+
+/**
+ * @brief Enable interrupts on the processor
+ * 
+ * To insulate the application from details about the processor, the global
+ * interrupt enable is put behind this interface function.
+ */
+void bsp_enable_interrupts(void)
+{
+    sei(); /* interrupt enable from the AVR header */
 }
 
 /**
@@ -47,6 +67,151 @@ void bsp_set_builtin_led(on_off_t led_state)
     } else {
         LED_PORT->PORT &= ~LED_PIN_MASK;
     }
+}
+
+/**
+ * @brief Set the BSP's timer interrupt callback.
+ * 
+ * @param[in] cb user supplied callback to handle BSP timer interrupts.
+ */
+void bsp_register_timer_isr_callback(IsrCallback_t cb)
+{
+    timer_16bit_set_callback(BSP_TIMER, cb);
+}
+
+/**
+ * @brief Set the BSP timer's period in microseconds and start running.
+ * 
+ * @note The timer can only handle a microsecond range of 0 (off) to 32767
+ * microseconds
+ * 
+ * @param[in] usec timer interval in microseconds
+ * 
+ * @retval E_TRUE  - successfully configured the timer
+ * @retval E_FALSE - failed to set timer's interval
+ */
+bool_t bsp_set_timer_period_uses(u16_t usec)
+{
+    static const u16_t PRESCALED_TICKS_PER_USEC = 2u;
+
+    bool_t result;
+    u16_t ticks;
+
+    /* assume configuration will fail */
+    result = E_FALSE;
+
+    /*
+     * Changing the period of the timer requires resetting it. Call the timer's
+     * initialization function to stop the timer and put it in a known starting
+     * state.
+     */
+    timer_16bit_init(BSP_TIMER);
+
+    if (MAX_USEC >= usec) {
+        /* 
+         * To have microsecond accuracy, the timer must be configured with a
+         * prescaler of 8 which means that each microsecond is 2 ticks 
+         * 
+         * Remember that we need to subtract 1 from our calculated tick value to
+         * compensate for the tick back to 0.
+         */
+        ticks = (usec * PRESCALED_TICKS_PER_USEC) - 1;
+        timer_16bit_set_ticks(BSP_TIMER, ticks);
+        timer_16bit_set_prescaler(BSP_TIMER, E_TIMER_PRESCALE_8);
+        result = E_TRUE;
+    }
+
+    return result;
+}
+
+/**
+ * @brief Set the BSP timer's period in milliseconds and start running.
+ * 
+ * @note The timer can only handle a millisecond range of 0 (off) to 262
+ * milliseconds
+ * 
+ * @param[in] msec timer interval in milliseconds
+ * 
+ * @retval E_TRUE  - successfully configured the timer
+ * @retval E_FALSE - failed to set timer's interval
+ */
+bool_t bsp_set_timer_period_msec(u16_t msec)
+{
+    static const u16_t PRESCALED_TICKS_PER_MSEC = 250u;
+
+    bool_t result;
+    u16_t ticks;
+
+    /* assume configuration will fail */
+    result = E_FALSE;
+
+    /*
+     * Changing the period of the timer requires resetting it. Call the timer's
+     * initialization function to stop the timer and put it in a known starting
+     * state.
+     */
+    timer_16bit_init(BSP_TIMER);
+
+    if (MAX_MSEC >= msec) {
+        /*
+        * To have millisecond accuracy, the timer must be configured with a
+        * prescaler of 64 which means that each microsecond is 250 ticks.
+        * 
+        * Remember that we need to subtract 1 from our calculated tick value to
+        * compensate for the tick back to 0.
+        */
+        ticks = (msec * PRESCALED_TICKS_PER_MSEC) - 1;
+        timer_16bit_set_ticks(BSP_TIMER, ticks);
+        timer_16bit_set_prescaler(BSP_TIMER, E_TIMER_PRESCALE_64);
+        result = E_TRUE;
+    }
+
+    return result;
+}
+
+/**
+ * @brief Set the BSP timer's period in seconds and start running.
+ * 
+ * @note The timer can only handle a second range of 0 (off) to 4 seconds
+ * 
+ * @param[in] sec timer interval in seconds
+ * 
+ * @retval E_TRUE  - successfully configured the timer
+ * @retval E_FALSE - failed to set timer's interval
+ */
+bool_t bsp_set_timer_period_sec(u16_t sec)
+{
+    static const u16_t PRESCALED_TICKS_PER_SEC = 15625u;
+
+    bool_t result;
+    u16_t ticks;
+
+    /* assume configuration will fail */
+    result = E_FALSE;
+
+    /*
+     * Changing the period of the timer requires resetting it. Call the timer's
+     * initialization function to stop the timer and put it in a known starting
+     * state.
+     */
+    timer_16bit_init(BSP_TIMER);
+
+    if (MAX_SEC >= sec) {
+
+        /*
+        * To have second accuracy, the timer must be configured with a prescaler
+        * of 1024 which means that each microsecond is 15625 ticks.
+        *  
+        * Remember that we need to subtract 1 from our calculated tick value to
+        * compensate for the tick back to 0.
+        */
+        ticks = (sec * PRESCALED_TICKS_PER_SEC) - 1;
+        timer_16bit_set_ticks(BSP_TIMER, ticks);
+        timer_16bit_set_prescaler(BSP_TIMER, E_TIMER_PRESCALE_1024);
+        result = E_TRUE;
+    }
+
+    return result;
 }
 
 /**

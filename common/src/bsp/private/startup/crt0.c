@@ -1,4 +1,4 @@
-#include "bsp/crt0.h"
+#include "bsp/private/startup/crt0.h"
 
 #include <avr/pgmspace.h>
 

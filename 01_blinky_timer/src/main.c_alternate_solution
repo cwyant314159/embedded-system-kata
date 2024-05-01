@@ -1,0 +1,111 @@
+#include "bsp/bsp.h"
+#include "types.h"
+
+
+#include <avr/interrupt.h>
+#include "bsp/private/processor/reg_io.h"
+
+
+typedef enum prescaler
+{
+    E_PRESCALE_0,       /* no clock source (same as pausing timer) */
+    E_PRESCALE_1,       /* CLK_io div 1 */
+    E_PRESCALE_8,       /* CLK_io div 8 */
+    E_PRESCALE_64,      /* CLK_io div 64 */
+    E_PRESCALE_256,     /* CLK_io div 256 */
+    E_PRESCALE_1024,    /* CLK_io div 1024 */
+} prescaler_t;
+
+static void set_prescaler(Timer16BitTypeDef *p_timer, prescaler_t scaler);
+
+/**
+ * @brief Blinky using timer application
+ * 
+ * This blinks an LED once a secont (500ms on/500ms off) using a hardware timer.
+ * This solution uses Timer 1 (16-bit timer) of the ATmega328P controller.
+ */
+int main(void)
+{
+    /* Initialize the board support (e.g. the LED) */
+    bsp_init();
+    
+    /* Set the LED's initial state to off */
+    bsp_set_builtin_led(E_OFF);
+
+    /* Ensure the timer is off (prescaler = 0) and interrupts are disabled. */
+    set_prescaler(TIM1, E_PRESCALE_0);
+    TIM1_IRQ->TIMSK = 0x00;
+
+    /*
+     * Configure the timer for Clear Timer on Compare Match (CTC) mode and set
+     * the prescaler to no clock source.
+     * 
+     * See Table 16-4 in the ATmega328P datasheet for more information on timer
+     * mode settings.
+     * 
+     * See Table 16-5 in the ATmega328P datasheet for more information on 
+     * prescaler clocks sources
+     * 
+     * NOTE: CTC Mode WGM[3:0] = 0100;
+     */
+    TIM1->TCCRA = (0 << WGM11) | (0 << WGM10);
+    TIM1->TCCRB = (0 << WGM13) | (1 << WGM12) | (0 << CS12) | (0 << CS11) | (0 << CS10);
+
+    /*
+     * Initialize the timer's counter to 0 and the output compare A register to
+     * its max value. This is done to prevent spurious interrupts from triggering.
+     */ 
+    TIM1->TCNT = 0;
+    TIM1->OCRA = 0xFFFF;
+
+    /* We do not want to start the timer yet. Interrupts have not been enabled
+       on the processor yet. */
+    bsp_enable_interrupts();
+
+    /* With processor interrupts enabled, we can now configure the timer to
+       expire at the required 500ms period. See the ocra_calculator.xlsx
+       spreadsheet for the computations for OCRA */
+    TIM1_IRQ->TIMSK = (1 << OCIE1A);        /* trigger interrupt on OCRA match */
+    TIM1->OCRA      = 0x1E84;               /* OCRA match value */
+    set_prescaler(TIM1, E_PRESCALE_1024);   /* set prescaler (timer on) */
+
+    while (1) {
+        /* Nothing to do */
+    }
+
+    return 0; /* Satisfy compiler. Should never get here */
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    bsp_toggle_builtin_led();
+}
+
+static void set_prescaler(Timer16BitTypeDef *p_timer, prescaler_t scaler)
+{
+    /* Clock selet bit masks for timer control register. See Table 16-5 in the
+       ATmega328P datasheet for more information. */
+    static const u8_t CS_BIT0 = (1u << 0);
+    static const u8_t CS_BIT1 = (1u << 1);
+    static const u8_t CS_BIT2 = (1u << 2);
+           const u8_t CS_MASK = (CS_BIT2 | CS_BIT1 | CS_BIT0); /* Can't make static */
+
+    u8_t ps_bits; /* register bit representaiton for prescaler */
+        
+    switch(scaler)
+    {
+        case E_PRESCALE_0   : ps_bits = 0x00;                        break;
+        case E_PRESCALE_1   : ps_bits =                     CS_BIT0; break;
+        case E_PRESCALE_8   : ps_bits =           CS_BIT1;           break;
+        case E_PRESCALE_64  : ps_bits =           CS_BIT1 | CS_BIT0; break;
+        case E_PRESCALE_256 : ps_bits = CS_BIT2;                     break;
+        case E_PRESCALE_1024: ps_bits = CS_BIT2 |           CS_BIT0; break;
+        default:              ps_bits = 0x00;                        break;
+    }
+
+    /* 
+     * The old prescaler bits must be masked out before the new bits can be
+     * OR'ed into the register.
+     */
+    p_timer->TCCRB = (p_timer->TCCRB & ~CS_MASK) | ps_bits;
+}

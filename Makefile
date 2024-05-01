@@ -17,8 +17,19 @@ OBJ_ROOT_DIR := obj
 # resultant path into the BINARY_DIR variable used below.
 BIN_ROOT_DIR := bin
 
-# Include the exercise specific variables.
+# Include the exercise specific variables. If no KATA value was specified on the
+# command line, the last KATA will be used by default.
+KATA ?=
+
+ifeq ($(KATA),)
+include 01_blinky_timer/exercise.mk
+else ifeq ($(KATA),0)
 include 00_bringup/exercise.mk
+else ifeq ($(KATA),1)
+include 01_blinky_timer/exercise.mk
+else
+$(error Invalid KATA number: $(KATA))
+endif
 
 # Now that the INC_FLAGS variable is defined, the rest of the compiler flags can
 # be included.

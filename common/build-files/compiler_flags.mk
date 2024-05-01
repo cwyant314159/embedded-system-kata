@@ -29,6 +29,7 @@ _COMPILE_FLAGS += -ffunction-sections
 _COMPILE_FLAGS += -fdata-sections
 _COMPILE_FLAGS += -fno-common
 _COMPILE_FLAGS += -fsigned-char
+_COMPILE_FLAGS += -O0
 
 # warnings #
 _COMPILE_FLAGS += -Wall

@@ -15,8 +15,6 @@ as the carrier.
 
 ## TODO
 
-- 01_blinky_timer_isr
-  - toggle LED in timer isr
 - 02_morse_code_sos
   - blink sos
 - 03_morse_code_hello_world
