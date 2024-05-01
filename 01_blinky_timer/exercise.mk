@@ -29,13 +29,13 @@ OBJ_DIR := $(OBJ_ROOT_DIR)/$(BINARY_NAME)
 
 # include directories used by the exercise #
 _INC_DIRS := common/src
-_INC_DIRS += 01_blinky_timer/src
+_INC_DIRS += $(BINARY_NAME)/src
 
 INC_FLAGS := $(foreach dir, $(_INC_DIRS), $(addprefix -I, $(dir)))
 
 # directories containing source files for the exercise (recursively searched)
 _SRC_DIRS := common/src
-_SRC_DIRS += 01_blinky_timer/src
+_SRC_DIRS += $(BINARY_NAME)/src
 
 # recursively search the _SRC_DIRS for .c, .cpp, and .s files
 SRC_FILES := $(foreach dir, $(_SRC_DIRS), $(shell find $(dir) -type f -name '*.cpp'))
