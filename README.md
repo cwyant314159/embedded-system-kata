@@ -15,16 +15,17 @@ as the carrier.
 
 ## TODO
 
-- 02_morse_code_sos
-  - blink sos
 - 03_morse_code_hello_world
   - refactor sos project to do hello world
 - 04_morse_code_c_cstr
   - refactor previous project to use any c string
-- 05_uart_echo_polling
-  - UART echo to terminal using polling (i.e. blocks)
-- 06_uart_echo_isr
-  - UART echo to terminal using ISRs
-- 07_morse_encoder
+- 05_uart_hello_world
+  - print hello world using the UART (bonus: use interrupts)
+- 06_uart_echo
+  - UART echo chars from host back to terminal (bonus: use interrupts)
+- 07_uart_sentence_statistics
+  - App to count the number of letters, white space chars, and punctionation in 
+    a new line separated string.
+- 08_morse_encoder
   - Application that converts newline terminated strings from the UART to
     morse code

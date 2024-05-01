@@ -22,11 +22,13 @@ BIN_ROOT_DIR := bin
 KATA ?=
 
 ifeq ($(KATA),)
-include 01_blinky_timer/exercise.mk
+include 02_sos/exercise.mk
 else ifeq ($(KATA),0)
 include 00_bringup/exercise.mk
 else ifeq ($(KATA),1)
 include 01_blinky_timer/exercise.mk
+else ifeq ($(KATA),2)
+include 02_sos/exercise.mk
 else
 $(error Invalid KATA number: $(KATA))
 endif
