@@ -1,5 +1,5 @@
-#ifndef MORSE_TIMINGS_H
-#define MORSE_TIMINGS_H
+#ifndef MORSE_PRIVATE_TIMINGS_H
+#define MORSE_PRIVATE_TIMINGS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,4 +22,4 @@ extern "C" {
 }
 #endif
 
-#endif /* MORSE_TIMINGS_H */
+#endif /* MORSE_PRIVATE_TIMINGS_H */

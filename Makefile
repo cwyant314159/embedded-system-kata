@@ -22,7 +22,7 @@ BIN_ROOT_DIR := bin
 KATA ?=
 
 ifeq ($(KATA),)
-include 03_hello_morse/exercise.mk
+include 04_morse_c_str/exercise.mk
 else ifeq ($(KATA),0)
 include 00_bringup/exercise.mk
 else ifeq ($(KATA),1)
@@ -31,6 +31,8 @@ else ifeq ($(KATA),2)
 include 02_sos/exercise.mk
 else ifeq ($(KATA),3)
 include 03_hello_morse/exercise.mk
+else ifeq ($(KATA),4)
+include 04_morse_c_str/exercise.mk
 else
 $(error Invalid KATA number: $(KATA))
 endif

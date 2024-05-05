@@ -1,4 +1,5 @@
 #include "bsp/bsp.h"
+#include "bsp/sw_timers.h"
 #include "morse/task.h"
 #include "types.h"
 
@@ -33,11 +34,18 @@ typedef enum scheduler_context
 static volatile SchedulerContext_t curr_context;
 static volatile size_t curr_minor_cycle;
 
+/* The exercise says that the morse code message should be encoded 3 seconds
+   after the last encoding. */
+#define MORSE_MESSAGE_DEALY (3u)
+static SwTimerHandle_t morse_delay_timer;
+static bool_t was_encoding;
+static const char * const MESSAGE = "Dave's not here.";
 
 static void primary_context(void);
 static void background_context(void);
 static void initialize_scheduler(void);
 static void scheduler_isr(void);
+static void morse_executive(void);
 
 /**
  * @brief Hello, Morse!
@@ -49,13 +57,20 @@ int main(void)
     /* Intialize the hardware and software modules */
     bsp_init();              /* board support (e.g. the LED) */
     morse_task_init();       /* morse code processing task */
+    sw_timer_init();         /* software timer facility */
     initialize_scheduler();  /* application scheduler (starts timer) */
 
-    /* Repeatedly output the morse code for this message */
-    morse_task_encode("Hello, Morse!", E_TRUE);
+    /* initialize data for the morse executive */
+    was_encoding = E_TRUE; /* logic will see the was = TRUE and now = FALSE to reset timer */
+    morse_delay_timer = sw_timer_acquire();
+    if (SW_TIMER_NO_TIMER == morse_delay_timer) {
+       bsp_error_trap();
+    }
 
     /* Scheduler loop */
     while (1) {
+        sw_timer_task();
+
         /* Execute the context as specified by the scheduler */
         if (E_CONTEXT_PRIMARY == curr_context) {
             primary_context();
@@ -81,11 +96,12 @@ int main(void)
 static void primary_context(void)
 {
     /* Tasks that should be called every cycle should go here. */
-    morse_task();
+    morse_executive();    
+
     /* Tasks that should be called once per major cycle should go here in an
        appropriate slot. It is best practice to not overload a particular
-       slot as this may impact scheduling. 
-       
+       slot as this may impact scheduling.
+
        NOTE: The number of cases is application specific and will shrink and
              grow based on scheduler configuration (NUM_MINOR_CYCLES). */
     switch (curr_minor_cycle) {
@@ -99,14 +115,14 @@ static void primary_context(void)
         case 7:     break;
         case 8:     break;
         case 9:     break;
-        
+
         /* The default case should never be reached unless there is a
            programming error with the minor cycle handling in the
            scheduler's ISR callback. */
         default: {
             // bsp_error_trap();
             break;
-        }    
+        }
     }
 
     /* PRIMARY context is over. Transition the context to BACKGROUND. */
@@ -131,8 +147,8 @@ static void background_context(void)
 
     /* Tasks that should be called once per major cycle should go here in an
        appropriate slot. It is best practice to not overload a particular
-       slot as this may impact scheduling. 
-       
+       slot as this may impact scheduling.
+
        NOTE: The number of cases is application specific and will shrink and
              grow based on scheduler configuration (NUM_MINOR_CYCLES). */
     switch (curr_minor_cycle) {
@@ -146,14 +162,14 @@ static void background_context(void)
         case 7:     break;
         case 8:     break;
         case 9:     break;
-        
+
         /* The default case should never be reached unless there is a
            programming error with the minor cycle handling in the
            scheduler's ISR callback. */
         default: {
             // bsp_error_trap();
             break;
-        }    
+        }
     }
 }
 
@@ -205,4 +221,34 @@ static void scheduler_isr(void)
     if (NUM_MINOR_CYCLES <= curr_minor_cycle) {
         curr_minor_cycle = 0;
     }
+}
+
+/**
+ * @brief Morse code executive routine.
+ * 
+ * The requiements of the exercise state that a C-string message must be
+ * converted to  morse code and blinked on the LED. Once the message has been
+ * encoded and blinked, the executive should wait MORSE_MESSAGE_DEALY seconds
+ * before blinking the message again.
+ */
+static void morse_executive(void)
+{
+    bool_t is_encoding;
+
+    is_encoding = morse_task_is_encoding();
+
+    if (E_FALSE == is_encoding) {
+        if (E_TRUE == was_encoding) {
+            /* The morse module has just finished the last encoding. Reset the
+               timer for the delay. */
+            sw_timer_reset(morse_delay_timer);
+        } else if (MORSE_MESSAGE_DEALY == sw_timer_sec(morse_delay_timer)) {
+            /* Delay time has expired. Send again. */
+            morse_task_encode(MESSAGE, E_FALSE);
+        }
+    }
+
+    was_encoding = is_encoding;
+
+    morse_task();
 }

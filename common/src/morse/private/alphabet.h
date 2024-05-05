@@ -1,5 +1,5 @@
-#ifndef MORSE_ALPHABET_H
-#define MORSE_ALPHABET_H
+#ifndef MORSE_PRIVATE_ALPHABET_H
+#define MORSE_PRIVATE_ALPHABET_H
 
 #include "types.h"
 
@@ -65,4 +65,4 @@ extern const MorseChar_t MORSE_NUMERIC_TABLE[10];
 
 
 
-#endif /* MORSE_ALPHABET_H */
+#endif /* MORSE_PRIVATE_ALPHABET_H */

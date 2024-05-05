@@ -1,6 +1,6 @@
-#include "morse_alphabet.h"
+#include "morse/private/alphabet.h"
 
-#include "morse_timings.h"
+#include "morse/private/timings.h"
 
 /* Macro short hands */
 #define DOT         MORSE_TIMING_DOT

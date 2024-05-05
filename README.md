@@ -15,8 +15,6 @@ as the carrier.
 
 ## TODO
 
-- 04_morse_code_c_cstr
-  - refactor previous project to use any c string
 - 05_uart_hello_world
   - print hello world using the UART (bonus: use interrupts)
 - 06_uart_echo
