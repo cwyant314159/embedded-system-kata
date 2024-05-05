@@ -1,11 +1,12 @@
 # Hello, Morse!
 
-It's time to put an embedded spin on the classical "Hello, World!" application
-using morse code.
+With the basics of morse code under your fingers, it is time to put a spin on
+the classical "Hello, World!" application using morse code.
 
 ## Exercise
 
-Write an application that continually blinks the morse code pattern for:
+Write an application that continually blinks the morse code pattern for the
+ASCII string:
 
     Hello, Morse!
 

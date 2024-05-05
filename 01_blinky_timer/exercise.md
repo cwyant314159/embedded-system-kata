@@ -2,9 +2,9 @@
 
 The last exercise established a development environment and also implemented the
 traditional hello world applications for embedded systems (blinky). This
-exercise extends the blinky application by utilizing a timer for more precise
-control over the blinking frequency. Upon completion of this exercise, you
-should have the following:
+exercise extends the blinky application by utilizing a hardware timer for more
+precise control over the blinking frequency. Upon completion of this exercise,
+you should have the following:
 
 - processor interrupts properly configured
 - a reliable time base for other applications

@@ -61,12 +61,13 @@ void mod_process(int x)
 ## Exercise
 
 Refactor the morse code logic into a module (header and source) with an API
-function that can convert any  C-style (`const char *`) string into morse code.
-You are free to set the maximum C string length.
+function that can convert any C-style (`const char *`) string into morse code.
+You are free to set the maximum C string length (which will dictate the maximum
+morse code symbols).
 
 After the morse code module has been refactored, write an application that will
 blink a message of your choosing then wait 3 seconds before transmitting again.
-To make things easier, the 3 second delay starts after the final wait time 
+To make things easier, the 3 second delay starts after the final symbol 
 including sentence, word, and character gaps.
 
 ### Bonus
