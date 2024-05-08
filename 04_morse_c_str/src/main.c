@@ -48,9 +48,9 @@ static void scheduler_isr(void);
 static void morse_executive(void);
 
 /**
- * @brief Hello, Morse!
+ * @brief Morse C-string
  *
- * Extend the LED SOS exercise to blink out HELLO MORSE<sentence gap>
+ * Blink out any C-string in morse code.
  */
 int main(void)
 {
