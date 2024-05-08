@@ -29,15 +29,21 @@ extern "C" {
     #error PRIVATE_RING_SIZE must be a power of 2!
 #endif
 
+#ifdef PRIVATE_RING_VOLATILE_DECL
+    #define PRIVATE_RING_VOLATILE__ volatile
+#else
+    #define PRIVATE_RING_VOLATILE__
+#endif
+
 #define PRIVATE_RING_DECLARATIONS(T_RING, T)                                            \
-typedef struct T_RING ## pointer_ring                                                     \
+typedef struct T_RING ## pointer_ring                                                   \
 {                                                                                       \
     size_t head;                                                                        \
     size_t tail;                                                                        \
     T data[PRIVATE_RING_SIZE];                                                          \
 } T_RING ## PrivateRing_t;                                                              \
                                                                                         \
-static inline void T_RING ## prv_ring_init(T_RING ## PrivateRing_t *p_ring)             \
+static inline void T_RING ## prv_ring_init(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     p_ring->head  = 0;                                                                  \
     p_ring->tail = PRIVATE_RING_SIZE - 1;                                               \
@@ -47,19 +53,19 @@ static inline void T_RING ## prv_ring_init(T_RING ## PrivateRing_t *p_ring)     
     }                                                                                   \
 }                                                                                       \
                                                                                         \
-static inline bool_t T_RING ## prv_ring_is_empty(T_RING ## PrivateRing_t *p_ring)       \
+static inline bool_t T_RING ## prv_ring_is_empty(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_tail = (p_ring->tail + 1) & (PRIVATE_RING_SIZE - 1);                    \
     return next_tail == p_ring->head;                                                   \
 }                                                                                       \
                                                                                         \
-static inline bool_t T_RING ## prv_ring_is_full(T_RING ## PrivateRing_t *p_ring)        \
+static inline bool_t T_RING ## prv_ring_is_full(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_head = (p_ring->head + 1) & (PRIVATE_RING_SIZE - 1);                    \
     return next_head == p_ring->tail;                                                   \
 }                                                                                       \
                                                                                         \
-static inline void T_RING ## prv_ring_push(T_RING ## PrivateRing_t *p_ring, T d)        \
+static inline void T_RING ## prv_ring_push(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring, T d) \
 {                                                                                       \
     if (E_FALSE == T_RING ## prv_ring_is_full(p_ring)) {                                \
         p_ring->data[p_ring->head] = d;                                                 \
@@ -68,7 +74,7 @@ static inline void T_RING ## prv_ring_push(T_RING ## PrivateRing_t *p_ring, T d)
     }                                                                                   \
 }                                                                                       \
                                                                                         \
-static inline T T_RING ## prv_ring_pop(T_RING ## PrivateRing_t *p_ring)                 \
+static inline T T_RING ## prv_ring_pop(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_tail = (p_ring->tail + 1) & (PRIVATE_RING_SIZE - 1);                    \
     T d = p_ring->data[next_tail];                                                      \
@@ -81,7 +87,7 @@ static inline T T_RING ## prv_ring_pop(T_RING ## PrivateRing_t *p_ring)         
     return d;                                                                           \
 }                                                                                       \
                                                                                         \
-static inline T T_RING ## prv_ring_peek(T_RING ## PrivateRing_t *p_ring)                \
+static inline T T_RING ## prv_ring_peek(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_tail = (p_ring->tail + 1) & (PRIVATE_RING_SIZE - 1);                    \
     T d = p_ring->data[next_tail];                                                      \
