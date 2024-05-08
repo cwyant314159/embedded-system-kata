@@ -18,7 +18,7 @@ typedef struct sw_timer
 
 
 /* Ring buffer infrastructure */
-#define PRIVATE_POINTER_RING_SIZE MAX_SW_TIMERS
+#define PRIVATE_RING_SIZE MAX_SW_TIMERS
 #include "utils/private_ring.h"
 
 PRIVATE_RING_DECLARATIONS(SwTimers, SwTimerHandle_t) /* create ring type of timer handles */

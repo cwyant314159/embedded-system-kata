@@ -25,7 +25,7 @@ extern "C" {
     #define PRIVATE_RING_SIZE  (16u)
 #endif
 
-#if (PRIVATE_RING_SIZE &(PRIVATE_RING_SIZE-1) != 0)
+#if ((PRIVATE_RING_SIZE & (PRIVATE_RING_SIZE-1)) != 0)
     #error PRIVATE_RING_SIZE must be a power of 2!
 #endif
 
