@@ -12,8 +12,6 @@ as the carrier.
 > serial connection will work.
 
 ## Project Roadmap
-- 06_uart_echo
-  - UART echo chars from host back to terminal (bonus: use interrupts)
 - 07_uart_sentence_statistics
   - App to count the number of letters, white space chars, and punctionation in 
     a new line separated string.

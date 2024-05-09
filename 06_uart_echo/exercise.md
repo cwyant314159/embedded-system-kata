@@ -1,4 +1,4 @@
-# Hello, UART!
+# UART Echo
 
 By now you should have the outbound (transmit) UART traffic working. This
 exercise will get the inbound (receiver) side working.
