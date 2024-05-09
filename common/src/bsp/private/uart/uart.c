@@ -81,7 +81,7 @@ void uart_init(void)
     */
     USART0->UCSRA = UART_UCSRA_U2X_MASK;
     USART0->UCSRC = UART_UCSRC_UCSZ1_MASK | UART_UCSRC_UCSZ0_MASK;
-    USART0->UCSRB = UART_UCSRB_TXEN_MASK;
+    USART0->UCSRB = UART_UCSRB_RXCIE_MASK | UART_UCSRB_RXEN_MASK | UART_UCSRB_TXEN_MASK;
 
     /* Initialize byte rings */
     BYTE_RING_INIT(rx_ring);
@@ -90,18 +90,26 @@ void uart_init(void)
 
 /**
  * @brief Check if the driver's receiver has data bytes.
- * 
+ *
  * @retval E_TRUE  - the driver's buffer has data bytes to read
  * @retval E_FALSE - the driver has no data to read
  */
 bool_t uart_data_available(void)
 {
-    return E_FALSE;
+    bool_t available;
+
+    if (E_TRUE == BYTE_RING_IS_EMPTY(rx_ring)) {
+        available = E_FALSE;
+    } else {
+        available = E_TRUE;
+    }
+
+    return available;
 }
 
 /**
  * @brief Read a byte from the driver's buffer
- * 
+ *
  * @return A byte received over the UART or NULL ('\0') if there are no bytes
  * left.
  */
@@ -109,10 +117,9 @@ u8_t uart_read(void)
 {
     u8_t byte;
 
-    if (E_FALSE == uart_data_available()) {
-        byte = '\0';
+    if (E_TRUE == uart_data_available()) {
+        byte = BYTE_RING_POP(rx_ring);
     } else {
-        /* TODO replace with read bytes */
         byte = '\0';
     }
 
@@ -121,9 +128,9 @@ u8_t uart_read(void)
 
 /**
  * @brief Write a byte to the driver's buffer
- * 
+ *
  * @param[in] byte the data byte to transmit over the UART
- * 
+ *
  * @retval E_TRUE  - byte successfully handled by driver
  * @retval E_FALSE - an error occurred during transmission
  */
@@ -143,8 +150,21 @@ bool_t uart_write(u8_t byte)
        empty the byte we just added (or the back up of bytes preventing the
        ring push) */
     USART0->UCSRB |= UART_UCSRB_UDRIE_MASK;
-    
+
     return result;
+}
+
+ISR(USART_RX_vect)
+{
+    u8_t data;
+
+    /* Read the data regardless of the ring state to clear the interrupt */
+    data = USART0->UDR;
+
+    /* Only push to the ring if it is not full. */
+    if (E_FALSE == BYTE_RING_IS_FULL(rx_ring)) {
+        BYTE_RING_PUSH(rx_ring, data);
+    }
 }
 
 ISR(USART_UDRE_vect)

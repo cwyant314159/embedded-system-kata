@@ -81,7 +81,15 @@ void bsp_set_builtin_led(on_off_t led_state)
  */
 bool_t bsp_serial_read(u8_t * const byte)
 {
-    return E_FALSE;
+    bool_t result;
+
+    result = E_FALSE;
+    if ((NULL_PTR != byte) && (E_TRUE == uart_data_available())) {
+        *byte = uart_read();
+        result = E_TRUE;
+    }
+
+    return result;
 }
 
 /**

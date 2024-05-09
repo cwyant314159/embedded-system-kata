@@ -7,6 +7,9 @@
 #define BAUD    (19200u)                    /* 19.2K */
 #define UBRR    ((F_CPU/(8.0f * BAUD)) - 1) /* assuming U2X0 is set */
 
+/* Polling operation attempts */
+#define MAX_POLL_ATTEMPTS   (1000)
+
 /**
  * @brief Initialize the UART hardware driver.
  */
@@ -73,25 +76,50 @@ void uart_init(void)
  */
 bool_t uart_data_available(void)
 {
-    return E_FALSE;
+    bool_t available;
+    u8_t   dummy;
+    u16_t  attempts_left;
+
+
+    /* Assume data is not available by default. */
+    available = E_FALSE;
+
+    if (0 != (USART0->UCSRA & UART_UCSRA_DOR_MASK)) {
+        /* When a receiver overrun is detected, empty the data register. The
+           extra read is to just be sure the overrun has been cleared. */
+        dummy = USART0->UDR;
+        dummy = USART0->UDR;
+        (void)dummy; /* appease the compiler's set but unused warning */
+    } else {
+        /* Poll the status register until the receive complete bit is set or the 
+           timeout occurs. */
+        attempts_left = MAX_POLL_ATTEMPTS;
+
+        while((0 == (USART0->UCSRA & UART_UCSRA_RXC_MASK)) && (0 != attempts_left)) {
+            attempts_left -= 1;
+        }
+
+        /* If the receive complete bit is still set, unblock and return true. */
+        if (0 != (USART0->UCSRA & UART_UCSRA_RXC_MASK)) {
+            available = E_TRUE;
+        }
+    }
+
+    return available;
 }
 
 /**
  * @brief Read a byte from the driver's buffer
  * 
- * @return A byte received over the UART or NULL ('\0') if there are no bytes
- * left.
+ * @return The contents of the UART's receiver buffer.
  */
 u8_t uart_read(void)
 {
     u8_t byte;
 
-    if (E_FALSE == uart_data_available()) {
-        byte = '\0';
-    } else {
-        /* TODO replace with read bytes */
-        byte = '\0';
-    }
+    /* Do a blind read of the data register. It is the caller's responsiblity to
+       ensure there is data in the RX buffer. */
+    byte = USART0->UDR;
 
     return byte;
 }
