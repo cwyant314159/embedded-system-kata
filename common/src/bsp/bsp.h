@@ -12,6 +12,9 @@ void bsp_enable_interrupts(void);
 void bsp_toggle_builtin_led(void);
 void bsp_set_builtin_led(on_off_t led_state);
 
+bool_t bsp_serial_read(u8_t * const byte);
+bool_t bsp_serial_write(u8_t byte);
+
 void bsp_register_timer_isr_callback(IsrCallback_t cb);
 bool_t bsp_set_timer_period_uses(u16_t usec);
 bool_t bsp_set_timer_period_msec(u16_t msec);

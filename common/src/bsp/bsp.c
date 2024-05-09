@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include "bsp/private/processor/reg_io.h"
 #include "bsp/private/timer/timer.h"
+#include "bsp/private/uart/uart.h"
 
 #define LED_PORT        (GPIO_B)
 
@@ -30,6 +31,7 @@ void bsp_init(void)
     LED_PORT->DDR   = LED_PIN_MASK; /* LED pin as output               */
     bsp_set_builtin_led(E_OFF);     /* LED is off on startup           */
     timer_16bit_init(BSP_TIMER);    /* initialize (and stop) the timer */
+    uart_init();
 }
 
 /**
@@ -67,6 +69,32 @@ void bsp_set_builtin_led(on_off_t led_state)
     } else {
         LED_PORT->PORT &= ~LED_PIN_MASK;
     }
+}
+
+/**
+ * @brief Read a byte from the serial driver
+ * 
+ * @param[out] byte output read from serial port
+ * 
+ * @retval E_TRUE  - successfully read byte
+ * @retval E_FALSE - unable to read byte
+ */
+bool_t bsp_serial_read(u8_t * const byte)
+{
+    return E_FALSE;
+}
+
+/**
+ * @brief Write a byte to the serial driver
+ * 
+ * @param[in] byte input to write to UART
+ * 
+ * @retval E_TRUE  - successfully write byte
+ * @retval E_FALSE - unable to write byte
+ */
+bool_t bsp_serial_write(u8_t byte)
+{
+    return uart_write(byte);
 }
 
 /**

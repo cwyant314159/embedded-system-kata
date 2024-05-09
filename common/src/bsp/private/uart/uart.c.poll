@@ -1,0 +1,121 @@
+#include "bsp/private/uart/uart.h"
+
+#include "bsp/private/processor/reg_io.h"
+#include "types.h"
+
+/* Baud rate configuration */
+#define BAUD    (19200u)                    /* 19.2K */
+#define UBRR    ((F_CPU/(8.0f * BAUD)) - 1) /* assuming U2X0 is set */
+
+/**
+ * @brief Initialize the UART hardware driver.
+ */
+void uart_init(void)
+{
+    u16_t ubrr_val; /* properly typed UBRR register value */
+    u16_t ubrr_hi;  /* UBRR register high bits */
+    u16_t ubrr_lo;  /* UBRR register low bits  */
+
+    /* The baurd rate settings are split across 2 registers: high and low. */
+    ubrr_val = (u16_t)UBRR;
+    ubrr_hi  = (ubrr_val >> 8) & 0x0F;
+    ubrr_lo  = (ubrr_val >> 0) & 0xFF;
+
+    USART0->UBRRH = (u8_t)ubrr_hi;
+    USART0->UBRRL = (u8_t)ubrr_lo;
+
+    /* hard disable the UART */
+    USART0->UCSRB = 0;
+    USART0->UCSRA = 0;
+
+    /*  Configure the control registers
+
+        CSR A
+        7. read-only (0)
+        6. transmit complete clear on write (0)
+        5. read-only (0)
+        4. read-only (0)
+        3. read-only (0)
+        2. read-only (0)
+        1. transmission speed doubler enabled (1)
+        0. multi-processor communication disabled (0)
+
+        CSRB
+        7. disable RX complete interrupt (0)
+        6. disable TX complete interrupt (0)
+        5. disable UART data register empty interrupt (0)
+        4. enable the RX (1)
+        3. disable the TX (0)
+        2. clear character size bit 2 (see CSRC for bits 0 - 1) (0)
+        1. read-only (0)
+        0. unused transmit data bit (0)
+
+        CSRC
+        7-6. UMSEL set to aynchronous UART (0)
+        5-4. UPM set to disable parity checks (0)
+        3.   1 stop bit (0)
+        2-1. configure character size to 8-bit (b11)
+        0.   unused synchronous only bit (0)
+
+        NOTE: CSRB is configured last to allow the TX/RX enable to occurr after
+              all other configuration.
+    */
+    USART0->UCSRA = UART_UCSRA_U2X_MASK;
+    USART0->UCSRC = UART_UCSRC_UCSZ1_MASK | UART_UCSRC_UCSZ0_MASK;
+    USART0->UCSRB = UART_UCSRB_RXEN_MASK;
+}
+
+/**
+ * @brief Check if the driver's receiver has data bytes.
+ * 
+ * @retval E_TRUE  - the driver's buffer has data bytes to read
+ * @retval E_FALSE - the driver has no data to read
+ */
+bool_t uart_data_available(void)
+{
+    return E_FALSE;
+}
+
+/**
+ * @brief Read a byte from the driver's buffer
+ * 
+ * @return A byte received over the UART or NULL ('\0') if there are no bytes
+ * left.
+ */
+u8_t uart_read(void)
+{
+    u8_t byte;
+
+    if (E_FALSE == uart_data_available()) {
+        byte = '\0';
+    } else {
+        /* TODO replace with read bytes */
+        byte = '\0';
+    }
+
+    return byte;
+}
+
+/**
+ * @brief Write a byte to the driver's buffer
+ * 
+ * @param[in] byte the data byte to transmit over the UART
+ * 
+ * @retval E_TRUE  - byte successfully handled by driver
+ * @retval E_FALSE - an error occurred during transmission
+ */
+bool_t uart_write(u8_t byte)
+{
+    /* If the transmitter is not enabled turn it on and transmit the byte. If
+       the transmitter is already enabled, wait for the transmit complete flag
+       to be set, before sending the byte. */
+    if (0 == (UART_UCSRB_TXEN_MASK & USART0->UCSRB)) {
+        USART0->UCSRB |= UART_UCSRB_TXEN_MASK;
+    } else {
+        while (0 == (UART_UCSRA_TXC_MASK & USART0->UCSRA)) { /* POLL */ }
+    }
+
+    USART0->UCSRA |= UART_UCSRA_TXC_MASK; /* clear the transmit complete flag */
+    USART0->UDR = byte;                   /* transmit */
+    return E_TRUE;
+}

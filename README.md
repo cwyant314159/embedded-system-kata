@@ -12,9 +12,6 @@ as the carrier.
 > serial connection will work.
 
 ## Project Roadmap
-
-- 05_uart_hello_world
-  - print hello world using the UART (bonus: use interrupts)
 - 06_uart_echo
   - UART echo chars from host back to terminal (bonus: use interrupts)
 - 07_uart_sentence_statistics
