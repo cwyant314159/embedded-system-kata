@@ -12,9 +12,6 @@ as the carrier.
 > serial connection will work.
 
 ## Project Roadmap
-- 07_uart_sentence_statistics
-  - App to count the number of letters, white space chars, and punctionation in 
-    a new line separated string.
 - 08_morse_encoder
   - Application that converts newline terminated strings from the UART to
     morse code

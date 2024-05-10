@@ -9,9 +9,9 @@
 #define UBRR    ((F_CPU/(8.0f * BAUD)) - 1) /* assuming U2X0 is set */
 
 /* Ring buffer infrastructure */
-#define BYTE_RING_MAX_SIZE  (128u)
-#define PRIVATE_RING_SIZE   BYTE_RING_MAX_SIZE    /* set ring size */
-#define PRIVATE_RING_VOLATILE_DECL                      /* byte rings in this module are volatile */
+#define BYTE_RING_MAX_SIZE  (256u)
+#define PRIVATE_RING_SIZE   BYTE_RING_MAX_SIZE  /* set ring size */
+#define PRIVATE_RING_VOLATILE_DECL              /* byte rings in this module are volatile */
 #include "utils/private_ring.h"
 
 PRIVATE_RING_DECLARATIONS(ByteRing, u8_t)                /* create ring type of bytes */
