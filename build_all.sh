@@ -4,8 +4,8 @@
 
 set -e # exit on errors
 
-FINAL_EXERCISE=7
+FINAL_EXERCISE=8
 
 for i in $(seq 0 $FINAL_EXERCISE); do
-    KATA=$i make build
+    KATA=$i make build -j
 done

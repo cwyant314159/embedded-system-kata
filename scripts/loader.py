@@ -27,7 +27,7 @@ class CliArgs:
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description='Microcontoller application loader utility.',
+            description='Microcontroller application loader utility.',
         )
 
         parser.add_argument('-v', '--verify', action='store_true',
