@@ -33,7 +33,7 @@ in the output below, there were 500 digits sent to the processor:
     Letters    : 11
     Vowels     : 3
     Digits     : 255+
-    Whitespace : 0
+    Whitespace : 1
     Punctuation: 0
 
 ### Bonus

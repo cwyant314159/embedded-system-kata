@@ -22,8 +22,8 @@ experience.
 punctuation should count against the 40 character limit. All other characters
 (non-printable, comma, etc.) should be ignored.
 
-- Strings are terminated with new lines ("\n"). Carriage returns ("\r") and
-null terminators ("\0") should be ignored.
+- Strings are terminated with new lines (`\n`). Carriage returns (`\r`) and
+null terminators (`\0`) should be ignored.
 
 - The application should not blink out the morse code until the new line
 character is received.
