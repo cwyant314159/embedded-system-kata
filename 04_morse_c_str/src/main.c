@@ -54,7 +54,7 @@ static void morse_executive(void);
  */
 int main(void)
 {
-    /* Intialize the hardware and software modules */
+    /* Initialize the hardware and software modules */
     bsp_init();              /* board support (e.g. the LED) */
     morse_task_init();       /* morse code processing task */
     sw_timer_init();         /* software timer facility */

@@ -14,7 +14,7 @@ static void say_hello(void);
  */
 int main(void)
 {
-    /* Intialize the hardware and software modules */
+    /* Initialize the hardware and software modules */
     bsp_init();              /* board support (e.g. the LED) */
     sw_timer_init();         /* software timer facility */
     

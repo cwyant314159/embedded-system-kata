@@ -20,7 +20,7 @@ int main(void)
 {
     SwTimerHandle_t delay_timer;
 
-    /* Intialize the hardware and software modules */
+    /* Initialize the hardware and software modules */
     bsp_init();         /* board support (e.g. the LED) */
     sw_timer_init();    /* software timer facility */
     statistics_init();  /* initialize the statistics module */

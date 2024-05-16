@@ -10,7 +10,7 @@ static void echo(void);
  */
 int main(void)
 {
-    /* Intialize the hardware and software modules */
+    /* Initialize the hardware and software modules */
     bsp_init();              /* board support (e.g. the LED) */
 
     /* enable interrupts */
