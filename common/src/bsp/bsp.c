@@ -106,6 +106,35 @@ bool_t bsp_serial_write(u8_t byte)
 }
 
 /**
+ * @brief Write a C-style string out the serial port.
+ * 
+ * @param[in] c_str null terminated string to output over serial
+ * 
+ * @retval E_TRUE  - successfully wrote string to serial driver
+ * @retval E_FALSE - serial driver encountered an error during write
+ */
+bool_t bsp_serial_write_c_str(const char* c_str)
+{
+    const char *p_c;
+    bool_t      result;
+
+    p_c    = c_str;
+    result = E_TRUE;
+    
+    while('\0' != *p_c) {
+        result = bsp_serial_write(*p_c);
+        p_c += 1;
+
+        /* If an error occurs, don't bother sending the rest of the string. */
+        if (E_FALSE == result) {
+            break;
+        }
+    }
+
+    return result;
+}
+
+/**
  * @brief Set the BSP's timer interrupt callback.
  * 
  * @param[in] cb user supplied callback to handle BSP timer interrupts.
