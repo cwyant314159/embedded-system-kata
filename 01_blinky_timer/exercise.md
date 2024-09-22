@@ -20,4 +20,3 @@ empty `while(1)` loop.
 
 Create an API for the hardware timer that will make it easier to port to a
 different processor. The `bsp` folder is the ideal place to put this API.
-

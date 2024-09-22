@@ -3,10 +3,11 @@
 Now that you have some experience with morse code, it is time to turn that
 knowledge into a re-usable module. For the purposes of this exercise, a module
 is defined as a header (.h) and source (.c) pair that encapsulates a specific
-piece of functionality. Below are some snippets that show the skeleton of 
+piece of functionality. Below are some snippets that show the skeleton of
 a typical C module.
 
 ### Module Header (mod.h)
+
 ```c
 #ifndef MOD_H
 #define MOD_H
@@ -29,6 +30,7 @@ void mod_process(int x); /* another API function               */
 ```
 
 ### Module Source (mod.c)
+
 ```c
 #include "mod.h"
 
@@ -67,10 +69,9 @@ morse code symbols).
 
 After the morse code module has been refactored, write an application that will
 blink a message of your choosing then wait 3 seconds before transmitting again.
-To make things easier, the 3 second delay starts after the final symbol 
+To make things easier, the 3 second delay starts after the final symbol
 including sentence, word, and character gaps.
 
 ### Bonus
 
 Rewrite the 03_hello_morse_application using the new morse code API.
-

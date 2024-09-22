@@ -1,7 +1,7 @@
 # Hello, UART!
 
-Let's take a break from morse code for a bit and add a new peripheral to our 
-toolbox. 
+Let's take a break from morse code for a bit and add a new peripheral to our
+toolbox.
 
 This exercise introduces the UART peripheral. The [Wikipedia](https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter)
 entry and your processor reference manual will have all the information you need

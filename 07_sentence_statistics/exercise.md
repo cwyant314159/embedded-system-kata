@@ -26,7 +26,7 @@ Format the output as follows:
     Punctuation: N
 
 The counts should clamp to a maximum value of 255. If the number of elements of
-a given type exceeds 255, append a plus sign ('+') to the count. For example, 
+a given type exceeds 255, append a plus sign ('+') to the count. For example,
 in the output below, there were 500 digits sent to the processor:
 
     =================

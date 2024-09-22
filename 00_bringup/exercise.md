@@ -1,6 +1,6 @@
 # Startup Code
 
-The goal of this exercise is to provide a stable base from which subsequent 
+The goal of this exercise is to provide a stable base from which subsequent
 exercises can build upon. Upon completion of this exercise, you should have the
 following:
 
@@ -24,4 +24,3 @@ If all of the above checks pass, flash you board's LED. The flashing should be
 visible to the human eye.
 
 > NOTE: If you don't not have (or want) to use C++, skip items 3 through 5.
-

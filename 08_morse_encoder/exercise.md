@@ -13,7 +13,7 @@ summarizes the requirements of the application:
 
 - Characters above 40 should be ignored.
 
-- The application should echo characters as they are typed for better user 
+- The application should echo characters as they are typed for better user
 experience.
 
 - The application does not have to handle the arrow keys, backspace, or delete.
@@ -33,6 +33,6 @@ in morse code.
 
 - The user should not send a new string while the current string is still
 blinking out the LED. If a new string is sent to the application while another
-string is still blinking, the message 
+string is still blinking, the message
 `"\n\rERROR: Encoding already in progress!\n\r"` should be transmitted out the
 UART.
