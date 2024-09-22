@@ -1,6 +1,6 @@
 # Embedded Systems Kata
 
-A collection of kata like exercises focusing on C and embedded systems. 
+A collection of kata like exercises focusing on C and embedded systems.
 
 The exercises build upon one another to work from absolutely nothing
 (00_bringup) to an application that will parse a string from the UART
