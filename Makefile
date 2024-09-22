@@ -23,7 +23,7 @@ debug:
 		-B$(DEBUG_BUILD_ROOT)
 
 
-	@cmake --build $(DEBUG_BUILD_ROOT)
+	@cmake --build $(DEBUG_BUILD_ROOT) -j2
 
 #
 # Release Build
@@ -35,7 +35,7 @@ release:
 		-S. \
 		-B$(RELEASE_BUILD_ROOT)
 
-	@cmake --build $(RELEASE_BUILD_ROOT)
+	@cmake --build $(RELEASE_BUILD_ROOT) -j2
 
 #
 # Minimum Size Release Build
@@ -47,7 +47,7 @@ min-release:
 		-S. \
 		-B$(MIN_RELEASE_BUILD_ROOT)
 
-	@cmake --build $(MIN_RELEASE_BUILD_ROOT)
+	@cmake --build $(MIN_RELEASE_BUILD_ROOT) -j2
 
 #
 # Remove all CMake generated files
