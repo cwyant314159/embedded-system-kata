@@ -45,7 +45,7 @@ void sw_timer_init(void)
 
     /* Clear out the ring buffer */
     TIMER_RING_INIT(handle_ring);
-    
+
     /* Reset all timer instances and enqueue their handles in the ring */
     for (t = 0; t < MAX_SW_TIMERS; t += 1) {
         sw_timer_reset(&timer_mem[t]);
@@ -59,11 +59,11 @@ void sw_timer_task(void)
 
     /* This task needs to be called as often as possible since our timer is only
        8-bits. It is very likely that overflows will be missed and time keeping
-       will be inaccurate if this function is delayed for too long. 
-       
+       will be inaccurate if this function is delayed for too long.
+
        Since this function calls a function with multiplication and division
        with values wider than the native processor width, this can get very
-       expensive very fast. The number of software timers must be balanced with 
+       expensive very fast. The number of software timers must be balanced with
        execution time of this refresh function. */
     for (t = 0; t < MAX_SW_TIMERS; t += 1) {
         (void)sw_timer_usec(&timer_mem[t]);
@@ -98,18 +98,30 @@ void sw_timer_reset(SwTimerHandle_t t)
 
 u32_t sw_timer_sec(SwTimerHandle_t t)
 {
-    /* It is expected that second timers are used for very coarse timings that 
-       do not require high accuracy. */
-    t->sec = (sw_timer_msec(t) / 1000);
-    return t->sec;
+    u32_t sec;
+
+    if (NULL_PTR != t) {
+        t->sec = (sw_timer_msec(t) / 1000);
+        sec = t->sec;
+    } else {
+        sec = 0U;
+    }
+
+    return sec;
 }
 
 u32_t sw_timer_msec(SwTimerHandle_t t)
 {
-    /* It is expected that millsecond timers are used for very coarse timings that 
-       do not require high accuracy. */
-    t->msec = (sw_timer_usec(t) / 1000);
-    return t->msec;
+    u32_t msec;
+
+    if (NULL_PTR != t) {
+        t->msec = (sw_timer_usec(t) / 1000);
+        msec = t->msec;
+    } else {
+        msec = 0U;
+    }
+
+    return msec;
 }
 
 u32_t sw_timer_usec(SwTimerHandle_t t)
@@ -124,7 +136,7 @@ u32_t sw_timer_usec(SwTimerHandle_t t)
 
         curr_ticks = TIM0->TCNT;
 
-        /* When the current ticks is less than the previous ticks, a rollover 
+        /* When the current ticks is less than the previous ticks, a rollover
            occurred and an offset of 256 (ticks to get back to 0) needs to be
            accounted for in the lapsed ticks. */
         if (curr_ticks < t->prev_ticks) {
@@ -140,7 +152,7 @@ u32_t sw_timer_usec(SwTimerHandle_t t)
            timings, but for the software timers this is ok. If finer timing
            control is required, a hardware timer will need to be used. */
         t->usec += ((u32_t)lapsed_ticks * USEC_PER_TIMER_CNT);
-        
+
         usec = t->usec;
     }
 

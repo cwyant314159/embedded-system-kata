@@ -1,0 +1,16 @@
+# Several API's used in the application are not used in their entirity. These
+# functions should not appear in the analysis report.
+
+# BSP API
+unusedFunction:exercises/common/src/bsp/bsp.c:158 # bsp_set_timer_period_usec
+unusedFunction:exercises/common/src/bsp/bsp.c:249 # bsp_set_timer_period_sec
+
+# Ring buffer API
+unusedFunction:exercises/common/src/bsp/private/uart/uart.c:17 # ByteRingprv_ring_peek
+unusedFunction:exercises/common/src/bsp/sw_timers.c:24         # SwTimersprv_ring_peek
+
+# Morse API
+unusedFunction:exercises/common/src/morse/task.c:144 # morse_task_is_repeat
+
+# Utils API
+unusedFunction:exercises/common/src/utils/ascii_char.c:166 # ascii_char_to_upper

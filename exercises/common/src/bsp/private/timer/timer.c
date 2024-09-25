@@ -21,8 +21,8 @@ static volatile IsrCallback_t timer0_callback = NULL_PTR;
 static volatile IsrCallback_t timer1_callback = NULL_PTR;
 static volatile IsrCallback_t timer2_callback = NULL_PTR;
 
-static TimerIrqRegTypeDef* get_irq_io(void* p_timer);
-static void set_irq_callback(void* p_timer, IsrCallback_t cb);
+static TimerIrqRegTypeDef* get_irq_io(const void* p_timer);
+static void set_irq_callback(const void* p_timer, IsrCallback_t cb);
 
 void timer_16bit_init(Timer16BitTypeDef* p_timer)
 {
@@ -113,7 +113,7 @@ void timer_16bit_set_ticks(Timer16BitTypeDef* p_timer, u16_t ticks)
 }
 
 
-void timer_16bit_set_callback(Timer16BitTypeDef* p_timer, IsrCallback_t cb)
+void timer_16bit_set_callback(const Timer16BitTypeDef* p_timer, IsrCallback_t cb)
 {
     /* The low level function will handle the error case for us. There is
        nothing we can do if the programmer fails to provide the right timer */
@@ -121,7 +121,7 @@ void timer_16bit_set_callback(Timer16BitTypeDef* p_timer, IsrCallback_t cb)
 }
 
 
-static TimerIrqRegTypeDef* get_irq_io(void* p_timer)
+static TimerIrqRegTypeDef* get_irq_io(const void* p_timer)
 {
     TimerIrqRegTypeDef* p_irq;
 
@@ -140,7 +140,7 @@ static TimerIrqRegTypeDef* get_irq_io(void* p_timer)
 }
 
 
-static void set_irq_callback(void* p_timer, IsrCallback_t cb)
+static void set_irq_callback(const void* p_timer, IsrCallback_t cb)
 {
     /* It's ugly but it works... */
     if ((void*)TIM0 == p_timer) {

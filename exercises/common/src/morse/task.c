@@ -55,7 +55,7 @@ static void cstr_to_waits(Context_t *p_ctx, const char * const c_str);
 static size_t pack_alphanum(char c, u8_t* wait_times);
 static void reset_counters(Context_t *p_ctx);
 static void reset_waits(Context_t *p_ctx);
-static State_t idle_state(Context_t *p_ctx);
+static State_t idle_state(const Context_t *p_ctx);
 static State_t encode_state(Context_t *p_ctx);
 
 /**
@@ -163,7 +163,7 @@ bool_t morse_task_is_repeat(void)
  *
  * @retval E_STATE_IDLE
  */
-static State_t idle_state(Context_t *p_ctx)
+static State_t idle_state(const Context_t *p_ctx)
 {
     return E_STATE_IDLE;
 }
@@ -203,7 +203,7 @@ static State_t encode_state(Context_t *p_ctx)
            within the wait time array), set the ticks left and move the index
            for the next time.
            */
-        if (0 == p_ctx->waits[p_ctx->waits_idx] || p_ctx->waits_idx > MAX_WAIT_TIMES) {
+        if (p_ctx->waits_idx >= MAX_WAIT_TIMES || 0 == p_ctx->waits[p_ctx->waits_idx]) {
             bsp_set_builtin_led(E_OFF);
             reset_counters(p_ctx);
 
@@ -293,7 +293,7 @@ static size_t pack_alphanum(char c, u8_t* out_times)
 
     sym_idx  = 0;
     time_idx = 0;
-    while (MORSE_CHAR_TERMINATOR != p_morse_char->symbol[sym_idx]) {
+    while (NULL_PTR != p_morse_char && MORSE_CHAR_TERMINATOR != p_morse_char->symbol[sym_idx]) {
         out_times[time_idx] = p_morse_char->symbol[sym_idx];
         time_idx += 1;
 
