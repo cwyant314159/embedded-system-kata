@@ -10,12 +10,13 @@ TOOLCHAIN := avr-gcc-toolchain.cmake
 
 # CppCheck flags
 CPPCHECK_FLAGS := --enable=all
+CPPCHECK_FLAGS += --enable=style
 CPPCHECK_FLAGS += --platform=avr8
 CPPCHECK_FLAGS += --std=c11
 CPPCHECK_FLAGS += --std=c++17
 CPPCHECK_FLAGS += --suppress=missingIncludeSystem
+CPPCHECK_FLAGS += --suppress=checkersReport
 CPPCHECK_FLAGS += --suppressions-list=cppcheck-suppressions.txt
-CPPCHECK_FLAGS += --checkers-report=checkers_report.txt
 
 # The coding style dictates that all variables be declared at the top of
 # every function. This causes CppCheck to throw "variable scope can be
@@ -67,7 +68,7 @@ min-release:
 # CppCheck targets for all the build types
 #
 cppcheck-debug: debug
-	@cppcheck --project=$(DEBUG_BUILD_ROOT)/compile_commands.json $(CPPCHECK_FLAGS) --checkers-report=foobar.txt
+	@cppcheck --project=$(DEBUG_BUILD_ROOT)/compile_commands.json $(CPPCHECK_FLAGS)
 
 cppcheck-release: release
 	@cppcheck --project=$(RELEASE_BUILD_ROOT)/compile_commands.json $(CPPCHECK_FLAGS)

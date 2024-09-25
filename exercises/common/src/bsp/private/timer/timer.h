@@ -21,7 +21,7 @@ typedef enum timer_prescaler
 void timer_16bit_init(Timer16BitTypeDef* p_timer);
 void timer_16bit_set_prescaler(Timer16BitTypeDef* p_timer, TimerPrescaler_t prescaler);
 void timer_16bit_set_ticks(Timer16BitTypeDef* p_timer, u16_t ticks);
-void timer_16bit_set_callback(Timer16BitTypeDef* p_timer, IsrCallback_t cb);
+void timer_16bit_set_callback(const Timer16BitTypeDef* p_timer, IsrCallback_t cb);
 
 #ifdef __cplusplus
 }

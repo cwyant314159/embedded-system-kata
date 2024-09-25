@@ -33,7 +33,7 @@ static void reset_context(Context_t *p_ctx);
 static void process_char(Context_t*p_ctx, char byte);
 static void saturate_increment(Element_t *p_elem);
 static void output_context(Context_t *p_ctx);
-static void output_element(Element_t *p_elem);
+static void output_element(const Element_t *p_elem);
 static void num_to_c_str(u8_t num, char * c_str);
 static void write_c_str(const char * const c_str);
 
@@ -119,7 +119,7 @@ static void output_context(Context_t *p_ctx)
     write_c_str("\n\n");
 }
 
-static void output_element(Element_t *p_elem)
+static void output_element(const Element_t *p_elem)
 {
     static const char * const clamp_str = "+";
 

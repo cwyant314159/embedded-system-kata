@@ -1,7 +1,11 @@
 # Several API's used in the application are not used in their entirity. These
 # functions should not appear in the analysis report.
 
-# Ring buffer API functions flagged as unused.
+# BSP API
+unusedFunction:exercises/common/src/bsp/bsp.c:158 # bsp_set_timer_period_usec
+unusedFunction:exercises/common/src/bsp/bsp.c:249 # bsp_set_timer_period_sec
+
+# Ring buffer API
 unusedFunction:exercises/common/src/bsp/private/uart/uart.c:17 # ByteRingprv_ring_peek
 unusedFunction:exercises/common/src/bsp/sw_timers.c:24         # SwTimersprv_ring_peek
 
