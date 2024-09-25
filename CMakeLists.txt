@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(
-    embedded-systems-kata
+project(embedded-systems-kata
     VERSION
         1.0
     DESCRIPTION
@@ -24,12 +23,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(MCU atmega328p)
 
 #
+# Linker flags
+#
+add_link_options(
+    -mmcu=${MCU}
+    -static
+    -Wl,--gc-sections
+)
+
+#
 # Build flags common to C, C++, and ASM
 #
-add_compile_definitions(F_CPU=16000000)
-
 set(COMMON_BUILD_FLAGS
     "-mmcu=${MCU} \
+    -DF_CPU=16000000 \
     -fstack-usage \
     -ffunction-sections \
     -fdata-sections \
@@ -45,9 +52,6 @@ set(COMMON_BUILD_FLAGS
     -pedantic"
 )
 
-#
-# C specific compiler flags
-#
 set(CMAKE_C_FLAGS
    "${CMAKE_C_FLAGS} ${COMMON_BUILD_FLAGS} \
     -Wimplicit-function-declaration \
@@ -55,9 +59,6 @@ set(CMAKE_C_FLAGS
     -Wstrict-prototypes"
 )
 
-#
-# C++ specific compiler flags
-#
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} ${COMMON_BUILD_FLAGS} \
     -Weffc++ \
@@ -66,16 +67,10 @@ set(CMAKE_CXX_FLAGS
     -fno-use-cxa-atexit"
 )
 
-#
-# ASM specific compiler flags
-#
-set(ASMFLAGS "${COMMON_BUILD_FLAGS}")
+set(ASMFLAGS
+    "${COMMON_BUILD_FLAGS}"
+)
 
-
-#
-# Linker flags
-#
-add_link_options(-mmcu=${MCU} -static -Wl,--gc-sections)
 
 #
 # Add the exercise solutions to the build.
