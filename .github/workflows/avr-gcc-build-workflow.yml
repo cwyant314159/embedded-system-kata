@@ -1,0 +1,41 @@
+name: Generic CppCheck Workflow
+
+on:
+  workflow_call:
+    inputs:
+      build-type:
+        required: true
+        type: string
+
+
+jobs:
+  cppcheck-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies
+        run: sudo apt install -y gcc-avr avr-libc
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+      - name: CMake Build
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          source-dir: .
+          build-dir: build-${{ inputs.build-type }}
+          options: |
+            CMAKE_TOOLCHAIN_FILE=avr-gcc-toolchain.cmake
+            CMAKE_BUILD_TYPE=${{ inputs.build-type }}
+      - name: Archive Bin Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: kata-binaries-${{ inputs.build-type }}
+          path: |
+           build-${{ inputs.build-type }}/exercises/**/*.elf
+           build-${{ inputs.build-type }}/exercises/**/*.bin
+           build-${{ inputs.build-type }}/exercises/**/*.hex
+           build-${{ inputs.build-type }}/exercises/**/*.lss
+           build-${{ inputs.build-type }}/exercises/**/*.map
+           build-${{ inputs.build-type }}/exercises/**/*.size.txt
+          retention-days: 5

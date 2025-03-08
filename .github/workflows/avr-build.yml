@@ -1,0 +1,33 @@
+name: AVR Kata
+on: [push]
+
+jobs:
+  release-lint:
+    uses: ./.github/workflows/avr-cppcheck-workflow.yml
+    with:
+      build-type: Release
+  release-build:
+    needs: release-lint
+    uses: ./.github/workflows/avr-gcc-build-workflow.yml
+    with:
+      build-type: Release
+
+  min-release-lint:
+    uses: ./.github/workflows/avr-cppcheck-workflow.yml
+    with:
+      build-type: MinSizeRel
+  min-release-build:
+    needs: min-release-lint
+    uses: ./.github/workflows/avr-gcc-build-workflow.yml
+    with:
+      build-type: MinSizeRel
+
+  debug-lint:
+    uses: ./.github/workflows/avr-cppcheck-workflow.yml
+    with:
+      build-type: Debug
+  debug-build:
+    needs: debug-lint
+    uses: ./.github/workflows/avr-gcc-build-workflow.yml
+    with:
+      build-type: Debug

@@ -1,0 +1,51 @@
+name: Generic CppCheck Workflow
+
+on:
+  workflow_call:
+    inputs:
+      build-type:
+        required: true
+        type: string
+
+
+jobs:
+  cppcheck-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies
+        run: sudo apt install -y gcc-avr avr-libc cppcheck
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+      - name: CMake Generation
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          source-dir: .
+          build-dir: build-${{ inputs.build-type }}
+          run-build: false
+          options: |
+            CMAKE_TOOLCHAIN_FILE=avr-gcc-toolchain.cmake
+            CMAKE_BUILD_TYPE=${{ inputs.build-type }}
+      - name: CppCheck Lint
+        run: |
+          cppcheck --project=build-${{ inputs.build-type }}/compile_commands.json \
+            --verbose \
+            --enable=all \
+            --enable=style \
+            --platform=avr8 \
+            --std=c11 \
+            --std=c++17 \
+            --suppress=missingIncludeSystem \
+            --suppress=checkersReport \
+            --suppress=variableScope:* \
+            --suppressions-list=cppcheck-suppressions.txt \
+            --xml \
+            2> ${{ inputs.build-type }}-report.xml
+      - name: Archive CppCheck Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.build-type }}-cppcheck-report
+          path: ${{ inputs.build-type }}-report.xml
+          retention-days: 5
