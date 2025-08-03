@@ -79,17 +79,20 @@ void bsp_set_builtin_led(on_off_t led_state)
  * @retval E_TRUE  - successfully read byte
  * @retval E_FALSE - unable to read byte
  */
-bool_t bsp_serial_read(u8_t * const byte)
+int bsp_serial_read(uint8_t * const byte)
 {
-    bool_t result;
-
-    result = E_FALSE;
-    if ((NULL_PTR != byte) && (E_TRUE == uart_data_available())) {
-        *byte = uart_read();
-        result = E_TRUE;
+    if (NULL == byte)
+    {
+        return 0;
     }
 
-    return result;
+    if (!uart_data_available())
+    {
+        return 0;
+    }
+
+    *byte = uart_read();
+    return 1;
 }
 
 /**
@@ -100,7 +103,7 @@ bool_t bsp_serial_read(u8_t * const byte)
  * @retval E_TRUE  - successfully write byte
  * @retval E_FALSE - unable to write byte
  */
-bool_t bsp_serial_write(u8_t byte)
+int bsp_serial_write(uint8_t byte)
 {
     return uart_write(byte);
 }
@@ -113,25 +116,21 @@ bool_t bsp_serial_write(u8_t byte)
  * @retval E_TRUE  - successfully wrote string to serial driver
  * @retval E_FALSE - serial driver encountered an error during write
  */
-bool_t bsp_serial_write_c_str(const char* c_str)
+int bsp_serial_write_c_str(const char* c_str)
 {
-    const char *p_c;
-    bool_t      result;
-
-    p_c    = c_str;
-    result = E_TRUE;
+    const char* p_c = c_str;
 
     while('\0' != *p_c) {
-        result = bsp_serial_write(*p_c);
-        p_c += 1;
-
         /* If an error occurs, don't bother sending the rest of the string. */
-        if (E_FALSE == result) {
-            break;
+        if (!bsp_serial_write(*p_c))
+        {
+            return 0;
         }
+
+        p_c += 1;
     }
 
-    return result;
+    return 1;
 }
 
 /**
@@ -155,20 +154,19 @@ void bsp_register_timer_isr_callback(IsrCallback_t cb)
  * @retval E_TRUE  - successfully configured the timer
  * @retval E_FALSE - failed to set timer's interval
  */
-bool_t bsp_set_timer_period_uses(u16_t usec)
+int bsp_set_timer_period_usec(uint16_t usec)
 {
     /*
      * To have microsecond accuracy, the timer must be configured with a
      * prescaler of 8 which means that each microsecond is 2 ticks.
      */
-    static const u16_t PRESCALED_TICKS_PER_USEC = 2u;
+    static const uint16_t PRESCALED_TICKS_PER_USEC = 2u;
     static const TimerPrescaler_t PRESCALER = E_TIMER_PRESCALE_8;
 
-    bool_t result;
-    u16_t ticks;
-
-    /* assume configuration will fail */
-    result = E_FALSE;
+    if (usec > MAX_USEC)
+    {
+        return 0;
+    }
 
     /*
      * Changing the period of the timer requires resetting it. Call the timer's
@@ -179,15 +177,11 @@ bool_t bsp_set_timer_period_uses(u16_t usec)
 
     /* Convert the duration into timer ticks. Remember that we need to subtract
        1 from our calculated tick value to compensate for the tick back to 0. */
-    ticks = (usec * PRESCALED_TICKS_PER_USEC) - 1U;
+    const uint16_t ticks = (usec * PRESCALED_TICKS_PER_USEC) - 1U;
 
-    if (MAX_USEC >= usec) {
-        timer_16bit_set_ticks(BSP_TIMER, ticks);
-        timer_16bit_set_prescaler(BSP_TIMER, PRESCALER);
-        result = E_TRUE;
-    }
-
-    return result;
+    timer_16bit_set_ticks(BSP_TIMER, ticks);
+    timer_16bit_set_prescaler(BSP_TIMER, PRESCALER);
+    return 1;
 }
 
 /**
@@ -201,20 +195,19 @@ bool_t bsp_set_timer_period_uses(u16_t usec)
  * @retval E_TRUE  - successfully configured the timer
  * @retval E_FALSE - failed to set timer's interval
  */
-bool_t bsp_set_timer_period_msec(u16_t msec)
+int bsp_set_timer_period_msec(uint16_t msec)
 {
     /*
      * To have millisecond accuracy, the timer must be configured with a
      * prescaler of 64 which means that each microsecond is 250 ticks.
      */
-    static const u16_t PRESCALED_TICKS_PER_MSEC = 250u;
+    static const uint16_t PRESCALED_TICKS_PER_MSEC = 250u;
     static const TimerPrescaler_t PRESCALER = E_TIMER_PRESCALE_64;
 
-    bool_t result;
-    u16_t ticks;
-
-    /* assume configuration will fail */
-    result = E_FALSE;
+    if (msec > MAX_MSEC)
+    {
+        return 0;
+    }
 
     /*
      * Changing the period of the timer requires resetting it. Call the timer's
@@ -225,15 +218,11 @@ bool_t bsp_set_timer_period_msec(u16_t msec)
 
     /* Convert the duration into timer ticks. Remember that we need to subtract
        1 from our calculated tick value to compensate for the tick back to 0. */
-    ticks = (msec * PRESCALED_TICKS_PER_MSEC) - 1U;
+    const uint16_t ticks = (msec * PRESCALED_TICKS_PER_MSEC) - 1U;
+    timer_16bit_set_ticks(BSP_TIMER, ticks);
+    timer_16bit_set_prescaler(BSP_TIMER, PRESCALER);
 
-    if (MAX_MSEC >= msec) {
-        timer_16bit_set_ticks(BSP_TIMER, ticks);
-        timer_16bit_set_prescaler(BSP_TIMER, PRESCALER);
-        result = E_TRUE;
-    }
-
-    return result;
+    return 1;
 }
 
 /**
@@ -246,20 +235,19 @@ bool_t bsp_set_timer_period_msec(u16_t msec)
  * @retval E_TRUE  - successfully configured the timer
  * @retval E_FALSE - failed to set timer's interval
  */
-bool_t bsp_set_timer_period_sec(u16_t sec)
+int bsp_set_timer_period_sec(uint16_t sec)
 {
     /*
      * To have second accuracy, the timer must be configured with a prescaler
      * of 1024 which means that each microsecond is 15625 ticks.
      */
-    static const u16_t PRESCALED_TICKS_PER_SEC = 15625u;
+    static const uint16_t PRESCALED_TICKS_PER_SEC = 15625u;
     static const TimerPrescaler_t PRESCALER = E_TIMER_PRESCALE_1024;
 
-    bool_t result;
-    u16_t ticks;
-
-    /* assume configuration will fail */
-    result = E_FALSE;
+    if (sec > MAX_SEC)
+    {
+        return 0;
+    }
 
     /*
      * Changing the period of the timer requires resetting it. Call the timer's
@@ -270,23 +258,19 @@ bool_t bsp_set_timer_period_sec(u16_t sec)
 
     /* Convert the duration into timer ticks. Remember that we need to subtract
        1 from our calculated tick value to compensate for the tick back to 0. */
-    ticks = (sec * PRESCALED_TICKS_PER_SEC) - 1U;
+    const uint16_t ticks = (sec * PRESCALED_TICKS_PER_SEC) - 1U;
 
-    if (MAX_SEC >= sec) {
+    /*
+    * To have second accuracy, the timer must be configured with a prescaler
+    * of 1024 which means that each microsecond is 15625 ticks.
+    *
+    * Remember that we need to subtract 1 from our calculated tick value to
+    * compensate for the tick back to 0.
+    */
+    timer_16bit_set_ticks(BSP_TIMER, ticks);
+    timer_16bit_set_prescaler(BSP_TIMER, PRESCALER);
 
-        /*
-        * To have second accuracy, the timer must be configured with a prescaler
-        * of 1024 which means that each microsecond is 15625 ticks.
-        *
-        * Remember that we need to subtract 1 from our calculated tick value to
-        * compensate for the tick back to 0.
-        */
-        timer_16bit_set_ticks(BSP_TIMER, ticks);
-        timer_16bit_set_prescaler(BSP_TIMER, PRESCALER);
-        result = E_TRUE;
-    }
-
-    return result;
+    return 1;
 }
 
 /**

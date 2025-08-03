@@ -1,8 +1,6 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
-#include "types.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

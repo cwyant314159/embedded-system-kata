@@ -1,8 +1,6 @@
 #ifndef STRING_ENCODER_H
 #define STRING_ENCODER_H
 
-#include "types.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

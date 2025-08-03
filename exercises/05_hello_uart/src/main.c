@@ -1,9 +1,8 @@
 #include "bsp/bsp.h"
 #include "bsp/sw_timers.h"
-#include "types.h"
 
 static SwTimerHandle_t delay_timer;
-static const u32_t MESSAGE_DELAY_SEC = 1u;
+static const uint32_t MESSAGE_DELAY_SEC = 1u;
 
 static void say_hello(void);
 
@@ -17,7 +16,7 @@ int main(void)
     /* Initialize the hardware and software modules */
     bsp_init();              /* board support (e.g. the LED) */
     sw_timer_init();         /* software timer facility */
-    
+
     /* initialize data for the delay timer */
     delay_timer = sw_timer_acquire();
     if (SW_TIMER_NO_TIMER == delay_timer) {
@@ -43,14 +42,11 @@ int main(void)
 
 static void say_hello(void)
 {
-    bool_t success;
-    const char * curr_char;
     static const char * const MESSAGE = "Hello, UART!\n\r";
 
-    curr_char = MESSAGE;
+    const char *curr_char = MESSAGE;
     while ('\0' != *curr_char) {
-        success = bsp_serial_write((u8_t)*curr_char);
-        if (E_FALSE == success) {
+        if (!bsp_serial_write((uint8_t)*curr_char)) {
             bsp_error_trap();
         }
 

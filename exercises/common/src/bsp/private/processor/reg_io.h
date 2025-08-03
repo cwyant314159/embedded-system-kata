@@ -5,7 +5,7 @@
 #ifndef REG_IO_H
 #define REG_IO_H
 
-#include "types.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,54 +13,54 @@ extern "C" {
 
 #define PACKED __attribute__((packed))
 
-#define IO__ volatile 
+#define IO__ volatile
 #define I___ const volatile
 #define O___ volatile
 
 typedef struct GpioPort
 {
-    IO__ u8_t  PIN;
-    IO__ u8_t  DDR;
-    IO__ u8_t  PORT;
+    IO__ uint8_t  PIN;
+    IO__ uint8_t  DDR;
+    IO__ uint8_t  PORT;
 } PACKED GpioPortTypeDef;
 
 typedef struct Timer8Bit
 {
-    IO__ u8_t  TCCRA;
-    IO__ u8_t  TCCRB;
-    IO__ u8_t  TCNT;
-    IO__ u8_t  OCRA;
-    IO__ u8_t  OCRB;
+    IO__ uint8_t  TCCRA;
+    IO__ uint8_t  TCCRB;
+    IO__ uint8_t  TCNT;
+    IO__ uint8_t  OCRA;
+    IO__ uint8_t  OCRB;
 } PACKED Timer8BitTypeDef;
 
 typedef struct TimerRegIrq
 {
-    IO__ u8_t  TIFR;
-         u8_t  reserved0[56];
-    IO__ u8_t  TIMSK;
+    IO__ uint8_t  TIFR;
+         uint8_t  reserved0[56];
+    IO__ uint8_t  TIMSK;
 } PACKED TimerIrqRegTypeDef;
 
 typedef struct Timer16Bit
 {
-    IO__ u8_t  TCCRA;
-    IO__ u8_t  TCCRB;
-    IO__ u8_t  TCCRC;
-         u8_t  reserved0;
-    IO__ u16_t TCNT;
-    IO__ u16_t ICR;
-    IO__ u16_t OCRA;
-    IO__ u16_t OCRB;
+    IO__ uint8_t  TCCRA;
+    IO__ uint8_t  TCCRB;
+    IO__ uint8_t  TCCRC;
+         uint8_t  reserved0;
+    IO__ uint16_t TCNT;
+    IO__ uint16_t ICR;
+    IO__ uint16_t OCRA;
+    IO__ uint16_t OCRB;
 } PACKED Timer16BitTypeDef;
 
-typedef struct Usart 
+typedef struct Usart
 {
-    IO__ u8_t UCSRA;
-    IO__ u8_t UCSRB;
-    IO__ u8_t UCSRC;
-         u8_t reserved0;
-    IO__ u8_t UBRRL;
-    IO__ u8_t UBRRH;
-    IO__ u8_t UDR;
+    IO__ uint8_t UCSRA;
+    IO__ uint8_t UCSRB;
+    IO__ uint8_t UCSRC;
+         uint8_t reserved0;
+    IO__ uint8_t UBRRL;
+    IO__ uint8_t UBRRH;
+    IO__ uint8_t UDR;
 } PACKED UsartTypeDef;
 
 #define UART_UCSRA_MPCM_OFFSET      (0u)

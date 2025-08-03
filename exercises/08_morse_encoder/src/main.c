@@ -2,7 +2,6 @@
 #include "bsp/bsp.h"
 #include "bsp/sw_timers.h"
 #include "morse/task.h"
-#include "types.h"
 
 #define MORSE_TASK_INTERVAL_MSEC (100U) /* see morse_task() documentation */
 

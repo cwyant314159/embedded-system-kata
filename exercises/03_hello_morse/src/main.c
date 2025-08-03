@@ -1,6 +1,5 @@
 #include "bsp/bsp.h"
 #include "morse/task.h"
-#include "types.h"
 
 /**
  * @brief Scheduler operating contexts.
@@ -52,7 +51,7 @@ int main(void)
     initialize_scheduler();  /* application scheduler (starts timer) */
 
     /* Repeatedly output the morse code for this message */
-    morse_task_encode("Hello, Morse!", E_TRUE);
+    morse_task_encode("Hello, Morse!", MORSE_TASK_ENABLE_REPEAT);
 
     /* Scheduler loop */
     while (1) {
@@ -84,8 +83,8 @@ static void primary_context(void)
     morse_task();
     /* Tasks that should be called once per major cycle should go here in an
        appropriate slot. It is best practice to not overload a particular
-       slot as this may impact scheduling. 
-       
+       slot as this may impact scheduling.
+
        NOTE: The number of cases is application specific and will shrink and
              grow based on scheduler configuration (NUM_MINOR_CYCLES). */
     switch (curr_minor_cycle) {
@@ -99,14 +98,14 @@ static void primary_context(void)
         case 7:     break;
         case 8:     break;
         case 9:     break;
-        
+
         /* The default case should never be reached unless there is a
            programming error with the minor cycle handling in the
            scheduler's ISR callback. */
         default: {
             // bsp_error_trap();
             break;
-        }    
+        }
     }
 
     /* PRIMARY context is over. Transition the context to BACKGROUND. */
@@ -131,8 +130,8 @@ static void background_context(void)
 
     /* Tasks that should be called once per major cycle should go here in an
        appropriate slot. It is best practice to not overload a particular
-       slot as this may impact scheduling. 
-       
+       slot as this may impact scheduling.
+
        NOTE: The number of cases is application specific and will shrink and
              grow based on scheduler configuration (NUM_MINOR_CYCLES). */
     switch (curr_minor_cycle) {
@@ -146,14 +145,14 @@ static void background_context(void)
         case 7:     break;
         case 8:     break;
         case 9:     break;
-        
+
         /* The default case should never be reached unless there is a
            programming error with the minor cycle handling in the
            scheduler's ISR callback. */
         default: {
             // bsp_error_trap();
             break;
-        }    
+        }
     }
 }
 

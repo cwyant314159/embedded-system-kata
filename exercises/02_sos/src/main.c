@@ -1,5 +1,4 @@
 #include "bsp/bsp.h"
-#include "types.h"
 
 /* Morse encoding in 100's of milliseconds */
 #define DOT          (1)        /* 100ms  */
@@ -12,7 +11,7 @@
 /* Number of morse elements in an SOS message */
 #define NUM_MORSE_ELEMENTS  (18)
 
-static const u8_t SOS_MORSE_TICKS[NUM_MORSE_ELEMENTS] = {
+static const uint8_t SOS_MORSE_TICKS[NUM_MORSE_ELEMENTS] = {
     DOT, SYM_GAP, DOT, SYM_GAP, DOT,    /* S */
     CHAR_GAP,
     DASH, SYM_GAP, DASH, SYM_GAP, DASH, /* O */
@@ -23,7 +22,7 @@ static const u8_t SOS_MORSE_TICKS[NUM_MORSE_ELEMENTS] = {
 
 
 static volatile size_t morse_index;
-static volatile u8_t ticks_left;
+static volatile uint8_t ticks_left;
 
 static void bsp_timer_isr_callback(void);
 
@@ -66,7 +65,7 @@ int main(void)
  * @brief BSP timer interrupt callback
  *
  * This decrements the ticks remaining for the current morse symbol. Once the
- * tick count reaches zero, the array index is advanced for the next morse 
+ * tick count reaches zero, the array index is advanced for the next morse
  * element. When all the elements have been "toggled" out, the index wraps back
  * to the beginning.
  */

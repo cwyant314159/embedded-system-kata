@@ -1,7 +1,6 @@
 #include "bsp/bsp.h"
 #include "bsp/sw_timers.h"
 #include "morse/task.h"
-#include "types.h"
 
 /**
  * @brief Scheduler operating contexts.
@@ -38,7 +37,7 @@ static volatile size_t curr_minor_cycle;
    after the last encoding. */
 #define MORSE_MESSAGE_DEALY (3u)
 static SwTimerHandle_t morse_delay_timer;
-static bool_t was_encoding;
+static int was_encoding;
 static const char * const MESSAGE = "Dave's not here.";
 
 static void primary_context(void);
@@ -61,7 +60,7 @@ int main(void)
     initialize_scheduler();  /* application scheduler (starts timer) */
 
     /* initialize data for the morse executive */
-    was_encoding = E_TRUE; /* logic will see the was = TRUE and now = FALSE to reset timer */
+    was_encoding = 1; /* logic will see the was = 1 and now = 0 to reset timer */
     morse_delay_timer = sw_timer_acquire();
     if (SW_TIMER_NO_TIMER == morse_delay_timer) {
        bsp_error_trap();
@@ -96,7 +95,7 @@ int main(void)
 static void primary_context(void)
 {
     /* Tasks that should be called every cycle should go here. */
-    morse_executive();    
+    morse_executive();
 
     /* Tasks that should be called once per major cycle should go here in an
        appropriate slot. It is best practice to not overload a particular
@@ -225,7 +224,7 @@ static void scheduler_isr(void)
 
 /**
  * @brief Morse code executive routine.
- * 
+ *
  * The requiements of the exercise state that a C-string message must be
  * converted to  morse code and blinked on the LED. Once the message has been
  * encoded and blinked, the executive should wait MORSE_MESSAGE_DEALY seconds
@@ -233,18 +232,16 @@ static void scheduler_isr(void)
  */
 static void morse_executive(void)
 {
-    bool_t is_encoding;
+    int is_encoding = morse_task_is_encoding();
 
-    is_encoding = morse_task_is_encoding();
-
-    if (E_FALSE == is_encoding) {
-        if (E_TRUE == was_encoding) {
+    if (!is_encoding) {
+        if (was_encoding) {
             /* The morse module has just finished the last encoding. Reset the
                timer for the delay. */
             sw_timer_reset(morse_delay_timer);
         } else if (MORSE_MESSAGE_DEALY == sw_timer_sec(morse_delay_timer)) {
             /* Delay time has expired. Send again. */
-            morse_task_encode(MESSAGE, E_FALSE);
+            morse_task_encode(MESSAGE, MORSE_TASK_DISABLE_REPEAT);
         }
     }
 

@@ -2,10 +2,12 @@
 
 #include "bsp/bsp.h"
 #include "utils/ascii_char.h"
-#include "types.h"
 
 #include "morse/private/alphabet.h"
 #include "morse/private/timings.h"
+
+#include <stdint.h>
+#include <stdlib.h>
 
 #define MAX_C_STR_LEN   (40)    /* handle strings of up to 40 chars */
 
@@ -42,17 +44,17 @@ typedef enum morse_states
  */
 typedef struct module_context
 {
-    bool_t repeat;                  /* do or don't repeat encoded message */
-    u8_t   waits[MAX_WAIT_TIMES];   /* message as morse code wait times   */
-    size_t waits_idx;               /* index into wait times array        */
-    u8_t   ticks_left;              /* ticks left until index increments  */
+    int     repeat;                  /* do or don't repeat encoded message */
+    uint8_t waits[MAX_WAIT_TIMES];   /* message as morse code wait times   */
+    size_t  waits_idx;               /* index into wait times array        */
+    uint8_t ticks_left;              /* ticks left until index increments  */
 } Context_t;
 
 static State_t curr_state;
 static Context_t ctx;
 
 static void cstr_to_waits(Context_t *p_ctx, const char * const c_str);
-static size_t pack_alphanum(char c, u8_t* wait_times);
+static size_t pack_alphanum(char c, uint8_t* wait_times);
 static void reset_counters(Context_t *p_ctx);
 static void reset_waits(Context_t *p_ctx);
 static State_t idle_state(const Context_t *p_ctx);
@@ -98,7 +100,7 @@ void morse_task(void)
  * @param[in] repeat when E_TRUE, configures the morse code module to repeatedly
  * output the message
  */
-void morse_task_encode(const char * c_str_msg, bool_t repeat)
+void morse_task_encode(const char * c_str_msg, int repeat)
 {
     /* Prep the context for the new message string */
     reset_counters(&ctx);
@@ -121,17 +123,13 @@ void morse_task_encode(const char * c_str_msg, bool_t repeat)
  * @retval E_TRUE the morse module is encoding (blinking) a message
  * @retval E_FALSE the morse module is sitting idle and waiting for input
  */
-bool_t morse_task_is_encoding(void)
+int morse_task_is_encoding(void)
 {
-    bool_t result;
-
     if (E_STATE_ENCODE == curr_state) {
-        result = E_TRUE;
-    } else {
-        result = E_FALSE;
+        return 1;
     }
 
-    return result;
+    return 0;
 }
 
 /**
@@ -141,17 +139,9 @@ bool_t morse_task_is_encoding(void)
  * @retval E_TRUE the morse module repeats the current message indefinitely
  * @retval E_FALSE the morse module only encodes the message once
  */
-bool_t morse_task_is_repeat(void)
+int morse_task_is_repeat(void)
 {
-    bool_t result;
-
-    if (E_TRUE == ctx.repeat) {
-        result = E_TRUE;
-    } else {
-        result = E_FALSE;
-    }
-
-    return result;
+    return ctx.repeat;
 }
 
 /**
@@ -182,10 +172,8 @@ static State_t idle_state(const Context_t *p_ctx)
  */
 static State_t encode_state(Context_t *p_ctx)
 {
-    State_t next_state;
-
     /* By default assume the state will stay in the ENCODE state */
-    next_state = E_STATE_ENCODE;
+    State_t next_state = E_STATE_ENCODE;
 
     if (p_ctx->ticks_left > 0) {
         /* This symbol still has some time to wait. */
@@ -207,7 +195,7 @@ static State_t encode_state(Context_t *p_ctx)
             bsp_set_builtin_led(E_OFF);
             reset_counters(p_ctx);
 
-            if (E_FALSE == p_ctx->repeat) {
+            if (!p_ctx->repeat) {
                 next_state = E_STATE_IDLE;
             }
         } else {
@@ -234,28 +222,24 @@ static void cstr_to_waits(Context_t *p_ctx, const char * const c_str)
      *       pointed to by the context's wait array.
      */
 
-    size_t       idx;       /* index into the waits array                */
-    const char  *curr_char; /* pointer to the current C string character */
-    const char  *next_char; /* pointer to the current C string character */
-
-    curr_char = c_str;
-    next_char = curr_char + 1;
-    idx       = 0;
+    size_t idx = 0;
+    const char *curr_char = c_str;
+    const char *next_char = curr_char + 1;
     while (*curr_char != '\0') {
 
-        if (E_TRUE == ascii_char_is_alphanum(*curr_char)) {
+        if (ascii_char_is_alphanum(*curr_char)) {
             idx += pack_alphanum(*curr_char, &p_ctx->waits[idx]);
 
             /* If the next character is another alphanumeric add the inter
                character gap. */
-            if ('\0' != *next_char && E_TRUE == ascii_char_is_alphanum(*next_char)) {
+            if ('\0' != *next_char && ascii_char_is_alphanum(*next_char)) {
                 p_ctx->waits[idx] = MORSE_TIMING_CHAR_GAP;
                 idx += 1;
             }
-        } else if (E_TRUE == ascii_char_is_whitespace(*curr_char)) {
+        } else if (ascii_char_is_whitespace(*curr_char)) {
             p_ctx->waits[idx] = MORSE_TIMING_WORD_GAP;
             idx += 1;
-        } else if (E_TRUE == ascii_char_is_terminal_punctuation(*curr_char)) {
+        } else if (ascii_char_is_terminal_punctuation(*curr_char)) {
             p_ctx->waits[idx] = MORSE_TIMING_SENTENCE_GAP;
             idx += 1;
         } else {
@@ -277,23 +261,16 @@ static void cstr_to_waits(Context_t *p_ctx, const char * const c_str)
  *
  * @return number of timing values added to output buffer
  */
-static size_t pack_alphanum(char c, u8_t* out_times)
+static size_t pack_alphanum(char c, uint8_t* out_times)
 {
-    size_t             sym_idx;       /* symbol time loop counter  */
-    size_t             time_idx;      /* out time loop counter     */
-    const MorseChar_t *p_morse_char;  /* converted Morse character */
+    /* converted Morse character */
+    const MorseChar_t *p_morse_char = (ascii_char_is_alpha(c))   ? &MORSE_ALPHA_TABLE[ALPHA_CHAR_TO_IDX(c)] :
+                                      (ascii_char_is_numeric(c)) ? &MORSE_NUMERIC_TABLE[NUM_CHAR_TO_IDX(c)] :
+                                                                   NULL;
 
-    if (E_TRUE == ascii_char_is_alpha(c)) {
-        p_morse_char = &MORSE_ALPHA_TABLE[ALPHA_CHAR_TO_IDX(c)];
-    } else if (E_TRUE == ascii_char_is_numeric(c)) {
-        p_morse_char = &MORSE_NUMERIC_TABLE[NUM_CHAR_TO_IDX(c)];
-    } else {
-        p_morse_char = NULL_PTR;
-    }
-
-    sym_idx  = 0;
-    time_idx = 0;
-    while (NULL_PTR != p_morse_char && MORSE_CHAR_TERMINATOR != p_morse_char->symbol[sym_idx]) {
+    size_t sym_idx  = 0; /* symbol time loop counter  */
+    size_t time_idx = 0; /* out time loop counter     */
+    while (NULL != p_morse_char && MORSE_CHAR_TERMINATOR != p_morse_char->symbol[sym_idx]) {
         out_times[time_idx] = p_morse_char->symbol[sym_idx];
         time_idx += 1;
 
@@ -331,10 +308,8 @@ void reset_counters(Context_t *p_ctx)
  */
 void reset_waits(Context_t *p_ctx)
 {
-    size_t i;   /* loop counter */
-
     /* Initialize wait time buffer. */
-    for (i = 0; i < MAX_WAIT_TIMES; i += 1) {
+    for (size_t i = 0; i < MAX_WAIT_TIMES; i += 1) {
         p_ctx->waits[i] = 0;
     }
 }

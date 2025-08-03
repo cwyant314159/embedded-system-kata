@@ -2,7 +2,6 @@
 
 #include <avr/interrupt.h>
 #include "bsp/private/processor/reg_io.h"
-#include "types.h"
 
 /* Baud rate configuration */
 #define BAUD    (19200u)                    /* 19.2K */
@@ -14,7 +13,7 @@
 #define PRIVATE_RING_VOLATILE_DECL              /* byte rings in this module are volatile */
 #include "utils/private_ring.h"
 
-PRIVATE_RING_DECLARATIONS(ByteRing, u8_t)                /* create ring type of bytes */
+PRIVATE_RING_DECLARATIONS(ByteRing, uint8_t)             /* create ring type of bytes */
 PRIVATE_RING_DECLARE(static volatile ByteRing, rx_ring); /* bytes to read             */
 PRIVATE_RING_DECLARE(static volatile ByteRing, tx_ring); /* bytes to write            */
 
@@ -31,17 +30,13 @@ PRIVATE_RING_DECLARE(static volatile ByteRing, tx_ring); /* bytes to write      
  */
 void uart_init(void)
 {
-    u16_t ubrr_val; /* properly typed UBRR register value */
-    u16_t ubrr_hi;  /* UBRR register high bits */
-    u16_t ubrr_lo;  /* UBRR register low bits  */
-
     /* The baurd rate settings are split across 2 registers: high and low. */
-    ubrr_val = (u16_t)UBRR;
-    ubrr_hi  = (ubrr_val >> 8) & 0x0F;
-    ubrr_lo  = (ubrr_val >> 0) & 0xFF;
+    const uint16_t ubrr_val = (uint16_t)UBRR;
+    const uint16_t ubrr_hi  = (ubrr_val >> 8) & 0x0F;
+    const uint16_t ubrr_lo  = (ubrr_val >> 0) & 0xFF;
 
-    USART0->UBRRH = (u8_t)ubrr_hi;
-    USART0->UBRRL = (u8_t)ubrr_lo;
+    USART0->UBRRH = (uint8_t)ubrr_hi;
+    USART0->UBRRL = (uint8_t)ubrr_lo;
 
     /* hard disable the UART */
     USART0->UCSRB = 0;
@@ -94,17 +89,9 @@ void uart_init(void)
  * @retval E_TRUE  - the driver's buffer has data bytes to read
  * @retval E_FALSE - the driver has no data to read
  */
-bool_t uart_data_available(void)
+int uart_data_available(void)
 {
-    bool_t available;
-
-    if (E_TRUE == BYTE_RING_IS_EMPTY(rx_ring)) {
-        available = E_FALSE;
-    } else {
-        available = E_TRUE;
-    }
-
-    return available;
+    return !BYTE_RING_IS_EMPTY(rx_ring);
 }
 
 /**
@@ -113,17 +100,9 @@ bool_t uart_data_available(void)
  * @return A byte received over the UART or NULL ('\0') if there are no bytes
  * left.
  */
-u8_t uart_read(void)
+uint8_t uart_read(void)
 {
-    u8_t byte;
-
-    if (E_TRUE == uart_data_available()) {
-        byte = BYTE_RING_POP(rx_ring);
-    } else {
-        byte = '\0';
-    }
-
-    return byte;
+    return uart_data_available() ? BYTE_RING_POP(rx_ring) : '\0';
 }
 
 /**
@@ -134,47 +113,39 @@ u8_t uart_read(void)
  * @retval E_TRUE  - byte successfully handled by driver
  * @retval E_FALSE - an error occurred during transmission
  */
-bool_t uart_write(u8_t byte)
+int uart_write(uint8_t byte)
 {
-    bool_t result;
-
-    /* If the ring is not full, add the byte to the buffer. */
-    if (E_FALSE == BYTE_RING_IS_FULL(tx_ring)) {
-        BYTE_RING_PUSH(tx_ring, byte);
-        result = E_TRUE;
-    } else {
-        result = E_FALSE;
-    }
-
     /* Regardless of the buffer state, we need to enable the transmitter to
        empty the byte we just added (or the back up of bytes preventing the
        ring push) */
     USART0->UCSRB |= UART_UCSRB_UDRIE_MASK;
 
-    return result;
+    if (BYTE_RING_IS_FULL(tx_ring))
+    {
+        return 0;
+    }
+
+    BYTE_RING_PUSH(tx_ring, byte);
+    return 1;
 }
 
 ISR(USART_RX_vect)
 {
-    u8_t data;
-
     /* Read the data regardless of the ring state to clear the interrupt */
-    data = USART0->UDR;
+    const uint8_t data = USART0->UDR;
 
     /* Only push to the ring if it is not full. */
-    if (E_FALSE == BYTE_RING_IS_FULL(rx_ring)) {
+    if (!BYTE_RING_IS_FULL(rx_ring)) {
         BYTE_RING_PUSH(rx_ring, data);
     }
 }
 
 ISR(USART_UDRE_vect)
 {
-    u8_t data;
-
-    if (E_TRUE == BYTE_RING_IS_EMPTY(tx_ring)) {
+    if (BYTE_RING_IS_EMPTY(tx_ring)) {
         USART0->UCSRB &= ~UART_UCSRB_UDRIE_MASK;
     } else {
-        data        = BYTE_RING_POP(tx_ring);
+        const uint8_t data = BYTE_RING_POP(tx_ring);
         USART0->UDR = data;
     }
 }

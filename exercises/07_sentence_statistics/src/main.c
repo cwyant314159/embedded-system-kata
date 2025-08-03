@@ -1,7 +1,6 @@
 #include "statistics.h"
 #include "bsp/bsp.h"
 #include "bsp/sw_timers.h"
-#include "types.h"
 
 #define TOGGLE_PERIOD_MSEC (500U)
 

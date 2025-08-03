@@ -1,7 +1,7 @@
 #ifndef TIMER_16BIT_H
 #define TIMER_16BIT_H
 
-#include "types.h"
+#include "bsp/bsp.h"
 #include "bsp/private/processor/reg_io.h"
 
 #ifdef __cplusplus
@@ -20,7 +20,7 @@ typedef enum timer_prescaler
 
 void timer_16bit_init(Timer16BitTypeDef* p_timer);
 void timer_16bit_set_prescaler(Timer16BitTypeDef* p_timer, TimerPrescaler_t prescaler);
-void timer_16bit_set_ticks(Timer16BitTypeDef* p_timer, u16_t ticks);
+void timer_16bit_set_ticks(Timer16BitTypeDef* p_timer, uint16_t ticks);
 void timer_16bit_set_callback(const Timer16BitTypeDef* p_timer, IsrCallback_t cb);
 
 #ifdef __cplusplus

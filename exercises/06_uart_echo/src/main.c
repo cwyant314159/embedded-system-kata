@@ -1,5 +1,4 @@
 #include "bsp/bsp.h"
-#include "types.h"
 
 static void echo(void);
 
@@ -26,9 +25,8 @@ int main(void)
 
 static void echo(void)
 {
-    u8_t byte;
-
-    if (E_TRUE == bsp_serial_read(&byte)) {
+    uint8_t byte;
+    if (bsp_serial_read(&byte)) {
         bsp_serial_write(byte);
         bsp_toggle_builtin_led();
     }

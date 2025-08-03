@@ -2,7 +2,6 @@
 
 #include "private/processor/reg_io.h"
 #include "bsp/bsp.h"
-#include "types.h"
 
 #define MAX_SW_TIMERS           (4u)
 #define USEC_PER_TIMER_CNT      (64u)
@@ -10,10 +9,10 @@
 
 typedef struct sw_timer
 {
-    u32_t sec;
-    u32_t msec;
-    u32_t usec;
-    u8_t  prev_ticks;
+    uint32_t sec;
+    uint32_t msec;
+    uint32_t usec;
+    uint8_t  prev_ticks;
 } SwTimer_t;
 
 
@@ -38,8 +37,6 @@ static void init_hw_timer(void);
 
 void sw_timer_init(void)
 {
-    size_t t;
-
     /* Start the hardware timer */
     init_hw_timer();
 
@@ -47,7 +44,7 @@ void sw_timer_init(void)
     TIMER_RING_INIT(handle_ring);
 
     /* Reset all timer instances and enqueue their handles in the ring */
-    for (t = 0; t < MAX_SW_TIMERS; t += 1) {
+    for (size_t t = 0; t < MAX_SW_TIMERS; t += 1) {
         sw_timer_reset(&timer_mem[t]);
         TIMER_RING_PUSH(handle_ring, &timer_mem[t]);
     }
@@ -55,8 +52,6 @@ void sw_timer_init(void)
 
 void sw_timer_task(void)
 {
-    size_t t;
-
     /* This task needs to be called as often as possible since our timer is only
        8-bits. It is very likely that overflows will be missed and time keeping
        will be inaccurate if this function is delayed for too long.
@@ -65,22 +60,19 @@ void sw_timer_task(void)
        with values wider than the native processor width, this can get very
        expensive very fast. The number of software timers must be balanced with
        execution time of this refresh function. */
-    for (t = 0; t < MAX_SW_TIMERS; t += 1) {
+    for (size_t t = 0; t < MAX_SW_TIMERS; t += 1) {
         (void)sw_timer_usec(&timer_mem[t]);
     }
 }
 
 SwTimerHandle_t sw_timer_acquire(void)
 {
-    SwTimerHandle_t handle;
-
-    if (E_TRUE == TIMER_RING_IS_EMPTY(handle_ring)) {
-        handle  = SW_TIMER_NO_TIMER;
-    } else {
-        handle = TIMER_RING_POP(handle_ring);
-        sw_timer_reset(handle);
+    if (TIMER_RING_IS_EMPTY(handle_ring)) {
+        return SW_TIMER_NO_TIMER;
     }
 
+    SwTimerHandle_t handle = TIMER_RING_POP(handle_ring);
+    sw_timer_reset(handle);
     return handle;
 }
 
@@ -96,67 +88,53 @@ void sw_timer_reset(SwTimerHandle_t t)
     }
 }
 
-u32_t sw_timer_sec(SwTimerHandle_t t)
+uint32_t sw_timer_sec(SwTimerHandle_t t)
 {
-    u32_t sec;
-
-    if (NULL_PTR != t) {
-        t->sec = (sw_timer_msec(t) / 1000);
-        sec = t->sec;
-    } else {
-        sec = 0U;
-    }
-
-    return sec;
-}
-
-u32_t sw_timer_msec(SwTimerHandle_t t)
-{
-    u32_t msec;
-
-    if (NULL_PTR != t) {
-        t->msec = (sw_timer_usec(t) / 1000);
-        msec = t->msec;
-    } else {
-        msec = 0U;
-    }
-
-    return msec;
-}
-
-u32_t sw_timer_usec(SwTimerHandle_t t)
-{
-    u32_t usec;
-    u16_t lapsed_ticks;
-    u8_t  curr_ticks;
-
     if (SW_TIMER_NO_TIMER == t) {
-        usec = 0u;
-    } else {
-
-        curr_ticks = TIM0->TCNT;
-
-        /* When the current ticks is less than the previous ticks, a rollover
-           occurred and an offset of 256 (ticks to get back to 0) needs to be
-           accounted for in the lapsed ticks. */
-        if (curr_ticks < t->prev_ticks) {
-            lapsed_ticks = ((u16_t)curr_ticks + TICK_ROLLOVER_OFFSET) - (u16_t)t->prev_ticks;
-        } else {
-            lapsed_ticks = (u16_t)curr_ticks - (u16_t)t->prev_ticks;
-        }
-
-        /* Update the previous ticks for next time */
-        t->prev_ticks = curr_ticks;
-
-        /* Each tick of the timer is 64 usec. This makes it hard to get accurate
-           timings, but for the software timers this is ok. If finer timing
-           control is required, a hardware timer will need to be used. */
-        t->usec += ((u32_t)lapsed_ticks * USEC_PER_TIMER_CNT);
-
-        usec = t->usec;
+        return 0u;
     }
 
-    return usec;
+    t->sec = (sw_timer_msec(t) / 1000);
+    return t->sec;
+}
+
+uint32_t sw_timer_msec(SwTimerHandle_t t)
+{
+    if (SW_TIMER_NO_TIMER == t) {
+        return 0u;
+    }
+
+    t->msec = (sw_timer_usec(t) / 1000);
+    return t->msec;
+}
+
+uint32_t sw_timer_usec(SwTimerHandle_t t)
+{
+    if (SW_TIMER_NO_TIMER == t) {
+        return 0u;
+    }
+
+    const uint8_t curr_ticks = TIM0->TCNT;
+
+    /* When the current ticks is less than the previous ticks, a rollover
+        occurred and an offset of 256 (ticks to get back to 0) needs to be
+        accounted for in the lapsed ticks. */
+    uint16_t lapsed_ticks;
+    if (curr_ticks < t->prev_ticks) {
+        lapsed_ticks = ((uint16_t)curr_ticks + TICK_ROLLOVER_OFFSET) - (uint16_t)t->prev_ticks;
+    } else {
+        lapsed_ticks = (uint16_t)curr_ticks - (uint16_t)t->prev_ticks;
+    }
+
+    /* Update the previous ticks for next time */
+    t->prev_ticks = curr_ticks;
+
+    /* Each tick of the timer is 64 usec. This makes it hard to get accurate
+        timings, but for the software timers this is ok. If finer timing
+        control is required, a hardware timer will need to be used. */
+    t->usec += ((uint32_t)lapsed_ticks * USEC_PER_TIMER_CNT);
+
+    return t->usec;
 }
 
 static void init_hw_timer(void)

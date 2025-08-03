@@ -1,7 +1,7 @@
 #ifndef MORSE_PRIVATE_ALPHABET_H
 #define MORSE_PRIVATE_ALPHABET_H
 
-#include "types.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +50,7 @@ typedef struct morse_character
        times is required. 5 for the symbols, 4 for the inter symbol gpas, 1 for
        the inter symbol gap quirk mentioned above, and 1 for the the terminator
        value.*/
-    u8_t symbol[11];
+    uint8_t symbol[11];
 } MorseChar_t;
 
 /* The alphabet of morse code characters. Use ALPHA_CHAR_TO_IDX for access. */

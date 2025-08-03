@@ -15,7 +15,7 @@
 #ifndef PRIVATE_RING_H
 #define PRIVATE_RING_H
 
-#include "types.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,13 +53,13 @@ static inline void T_RING ## prv_ring_init(PRIVATE_RING_VOLATILE__ T_RING ## Pri
     }                                                                                   \
 }                                                                                       \
                                                                                         \
-static inline bool_t T_RING ## prv_ring_is_empty(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
+static inline int T_RING ## prv_ring_is_empty(const PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_tail = (p_ring->tail + 1) & (PRIVATE_RING_SIZE - 1);                    \
     return next_tail == p_ring->head;                                                   \
 }                                                                                       \
                                                                                         \
-static inline bool_t T_RING ## prv_ring_is_full(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
+static inline int T_RING ## prv_ring_is_full(const PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_head = (p_ring->head + 1) & (PRIVATE_RING_SIZE - 1);                    \
     return next_head == p_ring->tail;                                                   \
@@ -67,7 +67,7 @@ static inline bool_t T_RING ## prv_ring_is_full(PRIVATE_RING_VOLATILE__ T_RING #
                                                                                         \
 static inline void T_RING ## prv_ring_push(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring, T d) \
 {                                                                                       \
-    if (E_FALSE == T_RING ## prv_ring_is_full(p_ring)) {                                \
+    if (!T_RING ## prv_ring_is_full(p_ring)) {                                          \
         p_ring->data[p_ring->head] = d;                                                 \
         p_ring->head = (p_ring->head + 1) & (PRIVATE_RING_SIZE - 1);                    \
                                                                                         \
@@ -79,7 +79,7 @@ static inline T T_RING ## prv_ring_pop(PRIVATE_RING_VOLATILE__ T_RING ## Private
     size_t next_tail = (p_ring->tail + 1) & (PRIVATE_RING_SIZE - 1);                    \
     T d = p_ring->data[next_tail];                                                      \
                                                                                         \
-    if (E_FALSE ==  T_RING ## prv_ring_is_empty(p_ring)) {                              \
+    if (!T_RING ## prv_ring_is_empty(p_ring)) {                                         \
         p_ring->data[p_ring->head] = d;                                                 \
         p_ring->tail = next_tail;                                                       \
     }                                                                                   \
@@ -87,7 +87,7 @@ static inline T T_RING ## prv_ring_pop(PRIVATE_RING_VOLATILE__ T_RING ## Private
     return d;                                                                           \
 }                                                                                       \
                                                                                         \
-static inline T T_RING ## prv_ring_peek(PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
+static inline T T_RING ## prv_ring_peek(const PRIVATE_RING_VOLATILE__ T_RING ## PrivateRing_t *p_ring) \
 {                                                                                       \
     size_t next_tail = (p_ring->tail + 1) & (PRIVATE_RING_SIZE - 1);                    \
     T d = p_ring->data[next_tail];                                                      \

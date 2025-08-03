@@ -18,11 +18,6 @@ CPPCHECK_FLAGS += --suppress=missingIncludeSystem
 CPPCHECK_FLAGS += --suppress=checkersReport
 CPPCHECK_FLAGS += --suppressions-list=cppcheck-suppressions.txt
 
-# The coding style dictates that all variables be declared at the top of
-# every function. This causes CppCheck to throw "variable scope can be
-# reduced" warnings.
-CPPCHECK_FLAGS += --suppress=variableScope:*
-
 all: debug release min-release
 
 .PHONY: debug release min-release clean
