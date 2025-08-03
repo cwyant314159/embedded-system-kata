@@ -1,0 +1,1 @@
+include(modules/GenerateArtifacts.cmake)

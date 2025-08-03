@@ -26,7 +26,7 @@ jobs:
           build-dir: build-${{ inputs.build-type }}
           run-build: false
           options: |
-            CMAKE_TOOLCHAIN_FILE=avr-gcc-toolchain.cmake
+            CMAKE_TOOLCHAIN_FILE=cmake/toolchains/avr-gcc-toolchain.cmake
             CMAKE_BUILD_TYPE=${{ inputs.build-type }}
       - name: CppCheck Lint
         run: |

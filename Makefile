@@ -6,7 +6,7 @@ RELEASE_BUILD_ROOT     := $(CMAKE_BUILD_ROOT)/release
 MIN_RELEASE_BUILD_ROOT := $(CMAKE_BUILD_ROOT)/min-release
 
 # Use the AVR toolchain file during CMake invocations
-TOOLCHAIN := avr-gcc-toolchain.cmake
+TOOLCHAIN := cmake/toolchains/avr-gcc-toolchain.cmake
 
 # CppCheck flags
 CPPCHECK_FLAGS := --enable=all
@@ -67,6 +67,8 @@ min-release:
 #
 # CppCheck targets for all the build types
 #
+cppcheck-all: cppcheck-debug cppcheck-release cppcheck-min-release
+
 cppcheck-debug: debug
 	@cppcheck --project=$(DEBUG_BUILD_ROOT)/compile_commands.json $(CPPCHECK_FLAGS)
 

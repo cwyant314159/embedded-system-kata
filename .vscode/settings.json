@@ -1,4 +1,10 @@
 {
+    "cmake.configureArgs": [],
+    "cmake.buildArgs": [ "--parallel" ],
+    "cmake.ctestArgs": [],
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/cmake/toolchains/avr-gcc-toolchain.cmake"
+    },
     "files.trimTrailingWhitespace": true,
     "C_Cpp.autoAddFileAssociations": false
 }

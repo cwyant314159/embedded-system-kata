@@ -25,7 +25,7 @@ jobs:
           source-dir: .
           build-dir: build-${{ inputs.build-type }}
           options: |
-            CMAKE_TOOLCHAIN_FILE=avr-gcc-toolchain.cmake
+            CMAKE_TOOLCHAIN_FILE=cmake/toolchains/avr-gcc-toolchain.cmake
             CMAKE_BUILD_TYPE=${{ inputs.build-type }}
       - name: Archive Bin Files
         uses: actions/upload-artifact@v4
